@@ -10,7 +10,7 @@ Additionally, in this repository, there is a pipeline for analyzing label-free a
 <br>
 
 # Requisites
-* R version >= 4.0
+* R version >= 4.2
 * Rstudio
   
 - "ProteinGroups.txt" file from MaxQuant. a test dataset can be found on "data" folder.
