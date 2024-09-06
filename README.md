@@ -1,3 +1,5 @@
+![Alt text](TaianProt_noback.png) 
+
 # TraianProt
 
 In this repository, the downstreaming analysis code for the quantitative proteomics analysis tool can be found.
