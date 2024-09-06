@@ -1,7 +1,5 @@
 ![Alt text](TraianProt.png) 
 
-# TraianProt
-
 In this repository, the downstreaming analysis code for the quantitative proteomics analysis tool can be found.
 <br>
 <br>
