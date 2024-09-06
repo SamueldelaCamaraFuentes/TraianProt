@@ -1,4 +1,4 @@
-![Alt text](TaianProt_noback.png) 
+![Alt text](TaianProt.png) 
 
 # TraianProt
 
