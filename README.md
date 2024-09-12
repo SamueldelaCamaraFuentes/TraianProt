@@ -3,9 +3,9 @@
 In this repository, the downstreaming analysis code for the quantitative proteomics analysis tool can be found.
 <br>
 <br>
-In the present repository, we can find the quantitative proteomic data analysis software focused on analyzing both DDA and DIA label free and labelled TMT data from MaxQuant, MSFragger, Proteome Discoverer and DIA-NN computational platforms. Its functionalities include preprocessing of data, differential expression analysis, functional and protein interaction analysis, along with visualization of each of the aforementioned stages.
+TraianProt is a web-based, user-friendly proteomics data analysis platform, that enables the analysis of label free and TMT labelled data from data-dependent or data-independent acquisition mass spectrometry mode  supporting MaxQuant, MSFragger, DIA-NN and Proteome Discoverer output formats. Its functionalities include preprocessing of data, differential expression analysis, functional and protein interaction analysis, along with visualization of each of the aforementioned stages.
 
-Additionally, in this repository, there is a pipeline for analyzing label-free and labelled quantitative proteomic data from several computational platforms such as MaxQuant, MSFragger, Proteome Discoverer and DIA-NN, whose files can be found in the "Pipeline" folder containing the main.R file, which drives the developed functionalities, and the files dataprocessing.R, quality_metrics.R, statisticalAnalysis.R, overviewfigures.R, enrichment.R, and Network.R, which contain the set of implemented functions. The set of files in the "Pipeline" folder serves the functions of the application in RStudio.
+Additionally, in this repository, there is a pipeline whose files can be found in the "R" folder containing the main.R file, which drives the developed functionalities, and the files dataprocessing.R, quality_metrics.R, statisticalAnalysis.R, overviewfigures.R, enrichment.R, and Network.R, which contain the set of implemented functions. The set of files in the "Pipeline" folder serves the functions of the application in RStudio.
 
 <br>
 
@@ -46,4 +46,4 @@ Additionally, in this repository, there is a pipeline for analyzing label-free a
 - *data set* after functional analsysis.
   
 # Credits
-Packages that make it work: dplyr, ggplot2, ggvenn, VIM, gplots, gprofiler2, igraph, plotly, limma, clusterprofiler, enrichplot, stringdb.
+Packages that make it work:  gprofiler2, igraph, limma, clusterprofiler, enrichplot, stringdb.
