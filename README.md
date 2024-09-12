@@ -1,6 +1,5 @@
 ![Alt text](TraianProt.png) 
 
-In this repository, the downstreaming analysis code for the quantitative proteomics analysis tool can be found.
 <br>
 <br>
 TraianProt is a web-based, user-friendly proteomics data analysis platform, that enables the analysis of label free and TMT labelled data from data-dependent or data-independent acquisition mass spectrometry mode  supporting MaxQuant, MSFragger, DIA-NN and Proteome Discoverer output formats. Its functionalities include preprocessing of data, differential expression analysis, functional and protein interaction analysis, along with visualization of each of the aforementioned stages.
