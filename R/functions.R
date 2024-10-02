@@ -167,8 +167,8 @@ quick_filtering <- function(raw, input, platform, organism, condition1, conditio
       return(df)
     } else if (platform == 3){
       df <- raw 
-      colnames(df)[3] <- "Protein"  #3
-      colnames(df)[1] <- "Protein_description" #1
+      colnames(df)[1] <- "Protein"
+      colnames(df)[3] <- "Protein_description"
       
       intensity_columns <- grepl("\\.d", colnames(df)) #Nos quedamos con aquellas columnas que corresponden con muestras
       intensity_columns <- colnames(df[intensity_columns])
@@ -189,9 +189,11 @@ quick_filtering <- function(raw, input, platform, organism, condition1, conditio
       ##############################################################################################################
       DIANN_report <- diann_load("report.tsv")
       samples <- unique(DIANN_report$Run)[order(unique(DIANN_report$Run))]
+      DIANN_report <- DIANN_report %>% #Filtramos por FDR del 1%
+        filter(Q.Value < 0.01)
       
       #Obtenemos los peptidos y peptidos unicos de cada muestra almacenado en listas 
-      process_subset <- function(df) {  #Antes Protein.Group era Genes
+      process_subset <- function(df) {
         colnames(df)[5] <- "Unique.Peptide.Count"
         data <- unique(df[, c('Protein.Group', 'Stripped.Sequence')])
         data.all <- df[, c('Protein.Group', 'Stripped.Sequence')]
@@ -270,19 +272,21 @@ quick_filtering <- function(raw, input, platform, organism, condition1, conditio
       df <- df %>%  #Se coge la variable del codigo
         rowwise() %>%
         mutate(
-          occurrences_condition1 = sum(!is.na(c_across(all_of(condition_1)))),
-          occurrences_condition2 = sum(!is.na(c_across(all_of(condition_2))))
+          counts_condition1 = sum(!is.na(c_across(all_of(condition_1)))),
+          counts_condition2 = sum(!is.na(c_across(all_of(condition_2))))
         ) %>%
         ungroup()
       
       # Combine the counts into a single non_na_counts column if needed
       df <- df %>%
-        mutate(occurences = occurrences_condition1 + occurrences_condition2)
+        mutate(counts = counts_condition1 + counts_condition2)
       
       # If you need to replace only when non_na_counts is 0 in the original column
       df <- df %>%
-        mutate(occurences = if_else(occurences == 0, occurrences_condition1 + occurrences_condition2, occurences))
+        mutate(counts = if_else(counts == 0, counts_condition1 + counts_condition2, counts))
       ##############################################################################################################
+      
+      return(df)
       
     } else if (platform == 4){
       df <- raw
