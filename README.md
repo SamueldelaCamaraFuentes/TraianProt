@@ -12,9 +12,9 @@ Additionally, in this repository, there is a pipeline whose files can be found i
 * R version >= 4.2
 * Rstudio
   
-- "ProteinGroups.txt" file from MaxQuant. a test dataset can be found on "data" folder.
-- "combined_protein.tsv" file from MSFragger.
-- "report.pg.matrix.tsv" file along with "report.tsv" file from DIA-NN in the same directory.
+- `ProteinGroups.txt` file from MaxQuant. a test dataset can be found on "data" folder.
+- `combined_protein.tsv` file from MSFragger.
+- `report.pg.matrix.tsv` file along with `report.tsv` file from DIA-NN in the same directory.
 - Output file from Proteome Discoverer. 
 
 <br>
