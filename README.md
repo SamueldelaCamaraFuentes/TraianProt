@@ -21,8 +21,8 @@ Additionally, in this repository, there is a pipeline whose files can be found i
 
 # Installation
 
-* Download the `app.R` and  `functions.R` files and load them into you R session
-* Click Run app
+* Download the `app.R` and  `functions.R` files and load them into you R session.
+* Click Run app.
 
 <br>
 
