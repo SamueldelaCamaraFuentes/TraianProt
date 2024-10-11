@@ -18,7 +18,11 @@ Additionally, in this repository, there is a pipeline whose files can be found i
 - Output file from Proteome Discoverer. 
 
 <br>
+# Installation
 
+`install`
+
+<br>
 # Outputs
 1. Quality metrics:
 - Boxplots
