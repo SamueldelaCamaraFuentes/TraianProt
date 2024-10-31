@@ -26,30 +26,5 @@ Additionally, in this repository, there is a pipeline whose files can be found i
 
 <br>
 
-# Outputs
-1. Quality metrics:
-- Boxplots
-- Dispersion plot
-- Scatter plots
-- Pre/post imputation plots
-- Histograms
-- Principal Component Analysis
-- Correlation plot
-- Q-Q plot
-2. Overview figures:
-- Volcano plot
-- Heatmap
-- Protein Intensity plot
-3. Enrichment:
-- Dotplot
-- Barplot
-- Manhattan plot
-4. Interactions:
-- Interaction networks
-5. Data:
-- *data set* after preprocessing
-- *data set* after statistical analysis
-- *data set* after functional analsysis.
-  
 # Credits
 Packages that make it work:  gprofiler2, igraph, limma, clusterprofiler, enrichplot, stringdb.
