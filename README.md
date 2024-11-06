@@ -24,8 +24,8 @@ Additionally, in this repository, there is a pipeline whose files can be found i
 * Download the `app.R` and  `functions.R` files and load them into you R session.
 * Click Run app.
 
-  # Test dataset
-  Test datasets are available in `data` folder
+# Test dataset
+Test datasets are available in `data` folder
 
 <br>
 
