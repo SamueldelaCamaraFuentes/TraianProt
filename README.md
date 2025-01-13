@@ -31,4 +31,4 @@ Test datasets are available in `data` folder
 
 # Reference:
 
-[1] de la Cámara-Fuentes, S., Picciani, Gutiérrez-Blázquez, Hernáez ML, Gil, C. (2024). TraianProt: a user-friendly R shiny application for wide format proteomics data downstream analysis.  arXiv:2412.15806.
+[1] de la Cámara-Fuentes, S., Gutiérrez-Blázquez, D., Hernáez, ML., Gil, C. (2024). TraianProt: a user-friendly R shiny application for wide format proteomics data downstream analysis.  arXiv:2412.15806.
