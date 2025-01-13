@@ -29,5 +29,6 @@ Test datasets are available in `data` folder
 
 <br>
 
-# Credits
-Packages that make it work:  gprofiler2, igraph, limma, clusterprofiler, enrichplot, stringdb.
+# Reference:
+
+[1] de la Cámara-Fuentes, S., Picciani, Gutiérrez-Blázquez, Hernáez ML, Gil, C. (2024). TraianProt: a user-friendly R shiny application for wide format proteomics data downstream analysis.  arXiv:2412.15806.
