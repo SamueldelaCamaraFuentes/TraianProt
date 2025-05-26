@@ -2,7 +2,7 @@
 
 <br>
 <br>
-TraianProt is a web-based, user-friendly proteomics data analysis platform, that enables the analysis of label free and TMT labelled data from data-dependent or data-independent acquisition mass spectrometry mode  supporting MaxQuant, MSFragger, DIA-NN, ProteoScape and Proteome Discoverer output formats. Its functionalities include preprocessing of data, differential expression analysis, functional and protein interaction analysis, along with visualization of each of the aforementioned stages.
+TraianProt is a web-based, user-friendly proteomics data analysis platform, that enables the analysis of label free and TMT labelled data from data-dependent or data-independent acquisition mass spectrometry mode  supporting MaxQuant, MSFragger, DIA-NN, ProteoScape and Proteome Discoverer output formats. Among its functionalities  preprocessing of data, differential expression analysis, functional and protein interaction analysis are included along with the visualization of each of the aforementioned stages.
 
 
 TraianProt can be accessed through the following url: https://samueldelacamara.shinyapps.io/TraianProt/
@@ -26,6 +26,7 @@ Additionally, in this repository, there is a pipeline whose files can be found i
 
 * Download the `app.R` and  `functions.R` files and load them into you R session.
 * Click Run app.
+* Access through the url provided above.
 
 # Test dataset
 Test datasets are available in `data` folder
