@@ -11,7 +11,6 @@ library(DT)
 if(!require(BiocManager)){install.packages("BiocManager")}
 library(BiocManager)
 options(repos = BiocManager::repositories())
-setwd("E:/SAMUEL/Mi app")
 source("functions.R")
 options(shiny.maxRequestSize = 30*1024^2)
 
@@ -35,6 +34,11 @@ ui <- dashboardPage(
                                           multiple = FALSE, 
                                           accept = c("text/csv",
                                                      ".csv")),
+                                fileInput(inputId = "metadata", 
+                                          label = h3("Metadata"),
+                                          multiple = FALSE, 
+                                          accept = c("text/csv",
+                                                     ".csv")),
                                 selectInput(inputId = "comptplatform", 
                                             label = "Platform",
                                             choices = list("MaxQuant" = 1, 
@@ -42,49 +46,38 @@ ui <- dashboardPage(
                                                            "DIA-NN" = 3,
                                                            "Proteome Discoverer" = 4,
                                                            "ProteoScape" = 5),
-                                            selected = 4),
+                                            selected = 3),
+                                conditionalPanel(
+                                  condition = "input.comptplatform == 3",
+                                  textInput(inputId = "pathdir",
+                                            label = "Directory Path:",
+                                            value = getwd())
+                                ),
+                                actionButton("setdir", "Set Directory"),
                                 selectInput(inputId = "labeltype", 
                                             label = "Type",
                                             choices = list("Label free" = 1, 
                                                            "TMT" = 2,
                                                            "SILAC" = 3),
                                             selected = 1),
+                                uiOutput("pairwise_selector"),
                                 selectInput(inputId = "organismfocus", 
                                             label = "Organism",
                                             choices = list("Candida albicans" = 1, 
                                                            "Other" = 2),
-                                            selected = 2),
-                                radioButtons(inputId = "intensitymode",
-                                             label = "Choose quantification",
-                                             choices = c("Intensity" = "int",
-                                                         "LFQ intensity" = "lfq",
-                                                         "Spectral Count" = "spcount"),
-                                             selected = "lfq"),
-                                
-                                textInput(inputId = "condition1",
-                                          label = "Control condition",
-                                          value = "Regexp condition 1"),
-                                
-                                textInput(inputId = "condition2",
-                                          label = "Treatment condition",
-                                          value = "Regexp condition 2"),
-                                
-                                numericInput(inputId = "repcond1",
-                                             label = "Control samples",
-                                             value = 4),
-                                
-                                numericInput(inputId = "repcond2",
-                                             label = "Treatment samples",
-                                             value = 4)),
+                                            selected = 2)),
                        menuItem("Pre-processing", icon = icon("th"), tabName = "preprocessing",
                                 h4("Filtering by samples"),
-                                numericInput(inputId = "minfiltro",
-                                             label = "Minimum values for filtering per condition",
-                                             value = 0),
+                                numericInput(inputId = "min_prop",
+                                             label = "Proportion for filtering",
+                                             value = 0.5),
                                 h4("Additional filtering step"),
                                 numericInput(inputId = "numberuniquepep",
                                              label = "Minimum number of unique peptides",
                                              value = 1),
+                                numericInput(inputId = "proportionsamples",
+                                             label = "Proportion of samples",
+                                             value = 0.5),
                                 switchInput(inputId = "uniquefilter",
                                             label = "Unique peptides filter",
                                             value = FALSE,
@@ -116,7 +109,12 @@ ui <- dashboardPage(
                                             choices = list("Common proteins between conditions" = 1,
                                                            "Exclusive control proteins" = 2,
                                                            "Exclusive treatment proteins" = 3),
-                                            selected = 1)),
+                                            selected = 1),
+                                downloadButton(outputId = "downloadprotquant",
+                                               label = "Download Proteins Quantified",
+                                               icon = icon("download"),
+                                               style="display: block; margin: 0 auto; width: 200px; color:black;")),
+                     
                        menuItem("Venn Diagram", icon = icon("th"), tabName = "venn",
                                 strong(h4("Condition 1")),
                                 textInput(inputId = "condition1venn",
@@ -150,6 +148,8 @@ ui <- dashboardPage(
                                                label = "Download Venn",
                                                icon = icon("download"),
                                                style="display: block; margin: 0 auto; width: 200px; color:black;")),
+                       
+                       #downloadprotquant
                        
                        menuItem("Download tables", icon = icon("download"), tabName = "Download",
                                 textInput(inputId = "filenamedownloadcomm",
@@ -511,7 +511,7 @@ ui <- dashboardPage(
                   title = "Home",
                   div(
                     imageOutput("home_img", inline = TRUE),
-                    style = "text-align: center; margin-left: 5%;"  # Adjust the margin as needed
+                    style = "text-align: center; margin-left: 0%;"  # Adjust the margin as needed
                   ),
                   div(
                     style = "
@@ -683,12 +683,11 @@ ui <- dashboardPage(
 
 
 
-
 server <- function(input, output) {
   #Home
   output$home_img <- renderImage({
     
-    list(src = "www/traianprot.png",
+    list(src = "traianprot.png",
          width = "80%",
          height = 1000)
     
@@ -696,79 +695,201 @@ server <- function(input, output) {
   
   #Data handling
   #Several reactive variables in order to plot the quality metrics plots
+  metadata <- reactive({
+    
+    metadata <- read.delim(input$metadata$datapath, sep = "\t", stringsAsFactors = FALSE, colClasses = "character")
+    
+    if (input$comptplatform == 1 | input$comptplatform == 2 | input$comptplatform == 5){
+    req(input$file) #Controls whether a file has been uploaded or not
+    
+    metadata <- metadata %>%
+      mutate(
+        raw_name = intensity_sample_name,
+        intensity_sample_name = raw_name,
+        log2_col = sub("Intensity", "LOG2", raw_name)
+      ) %>% 
+      mutate(
+        raw_name = intensity_sample_name,
+        unique_peptides_col = sub("Intensity", "Unique.peptides", raw_name)
+      )%>%
+      select(intensity_sample_name, group, sample_name, log2_col, unique_peptides_col) 
+    } else if (input$comptplatform == 3) {
+      metadata <- metadata %>%
+        mutate(
+          raw_name = basename(intensity_sample_name),
+          intensity_sample_name = raw_name,
+          log2_col = sub("\\.(d|raw)$", ".LOG2", raw_name, ignore.case = TRUE),
+          unique_peptides_col = paste0("Unique peptides ", sub("\\.(d|raw)$", "", raw_name, ignore.case = TRUE))
+          
+        ) %>%
+        select(intensity_sample_name, group, sample_name, log2_col, unique_peptides_col)
+    
+    } else if (input$comptplatform == 4){
+        
+      metadata <- metadata %>%
+        mutate(
+          raw_name = intensity_sample_name,
+          intensity_sample_name = raw_name,
+          log2_col = sub("Abundance:", "LOG2", raw_name)
+        ) %>% 
+        mutate(
+          raw_name = intensity_sample_name,
+          unique_peptides_col = sub("Abundance:", "Unique.peptides", raw_name)
+        )%>%
+        select(intensity_sample_name, group, sample_name, log2_col, unique_peptides_col) 
+      
+    
+  }
+    
+    return(metadata)
+  })
+  
+  # Reactive to extract unique condition names
+  condition_pairs <- reactive({
+    req(metadata())
+    conditions <- unique(metadata()$group)
+    if (length(conditions) < 2) return(NULL)
+    
+    # Get all asymmetric (directional) pairs
+    all_pairs <- expand.grid(conditions, conditions, stringsAsFactors = FALSE)
+    asymmetric_pairs <- all_pairs[all_pairs$Var1 != all_pairs$Var2, ]
+    
+    # Turn each row into a character vector
+    result <- apply(asymmetric_pairs, 1, function(row) c(row[1], row[2]))
+    
+    # Convert matrix to list of 2-element vectors
+    condition_pairs <- split(result, rep(1:ncol(result), each = nrow(result)))
+    return(condition_pairs)
+  })
+  
+  output$pairwise_selector <- renderUI({
+    req(condition_pairs())
+    pairs <- condition_pairs()
+    if (is.null(pairs)) return(NULL)
+    
+    choices <- sapply(pairs, function(pair) paste(pair[1], "vs", pair[2]))
+    names(choices) <- NULL
+    selectInput("selected_pair", "Select Comparison", choices = choices)
+  })
+  
+  selected_conditions <- reactive({
+    req(condition_pairs)
+    if (is.null(input$selected_pair)) {
+      unique(metadata()$group)[1:2]
+    } else {
+      selected_conditions <- strsplit(input$selected_pair, " vs ")[[1]]
+      print(selected_conditions)
+     
+    }
+    return(selected_conditions)
+  })
+  
+  filtered_metadata <- reactive({
+    req(metadata(), selected_conditions())
+    metadata() %>% filter(group %in% selected_conditions())
+  })
+  
+  selected_dir <- reactiveVal(getwd())
+  
+  observeEvent(input$setdir, {
+    req(input$pathdir)
+    if (dir.exists(input$pathdir)) {
+      selected_dir(normalizePath(input$pathdir))
+      # Optional: You can print or use selected_dir() wherever needed
+    } else {
+      showNotification("Error: Directory does not exist.", type = "error")
+    }
+  })
+  
+  
   
   data_quick <- reactive({
+    
     if (input$comptplatform == 1 | input$comptplatform == 2 | input$comptplatform == 5){
       req(input$file) #Controls whether a file has been uploaded or not
   
       raw <- read.delim(input$file$datapath, sep = "\t", stringsAsFactors = FALSE, colClasses = "character") 
-      df<- quick_filtering(raw, input$intensitymode, input$comptplatform, input$organismfocus, input$condition1, input$condition2)
+      df<- quick_filtering(raw, input$comptplatform, input$organismfocus, filtered_metadata(), selected_conditions())
       return(df)
     } else if (input$comptplatform == 3){
       req(input$file) #Controls whether a file has been uploaded or not
       
       raw <- read.delim(input$file$datapath, sep = "\t", stringsAsFactors = FALSE, colClasses = "character", check.names = FALSE) 
-      df<- quick_filtering(raw, input$intensitymode, input$comptplatform, input$organismfocus, input$condition1, input$condition2) #Marcarlo como dataframe 
+      df<- quick_filtering(raw, input$comptplatform, input$organismfocus, filtered_metadata(), selected_conditions(), selected_dir()) #Marcarlo como dataframe 
       df <- as.data.frame(df)
       return(df)
     } else if (input$comptplatform == 4){
       
       raw <- as.data.frame(readxl::read_xlsx(input$file$datapath))
       
-      df<- quick_filtering(raw, input$intensitymode, input$comptplatform, input$organismfocus, input$condition1, input$condition2)
+      df<- quick_filtering(raw, input$comptplatform, input$organismfocus, filtered_metadata(), selected_conditions())
       return(df)
     }
     
   })
   
+  data_quick_upf <- reactive({ #To avoid unique peptides filtration in later steps
+    if (input$uniquefilter == TRUE){
+      df.F <- unique_peptides_filter(data_quick(), filtered_metadata(), input$numberuniquepep, input$proportionsamples)
+      return(df.F)
+    } else{
+      df <- data_quick()
+      return(df)
+  }
+  })
+  
   LOG2.names <- reactive({ #Set of samples in our dataset
+    req(data_quick())
     LOG2.names <- obtain_LOG.names(data_quick())
     return(LOG2.names)
   })
   
-  cond.names <- reactive({ #subset of samples of interest in our dataset
-    condition1_names <- grep(input$condition1, LOG2.names(), value = TRUE)
-    condition2_names <- grep(input$condition2, LOG2.names(), value = TRUE)
-    intensity_names <- c(condition1_names,condition2_names)
+  cond.names <- reactive({ 
+    req(filtered_metadata())
+    
+    first_group <- unique(filtered_metadata()$group)[unique(filtered_metadata()$group) == selected_conditions()[2]]
+    
+    condition1_names <- filtered_metadata() %>%
+      filter(group == first_group) %>%
+      pull(intensity_sample_name)
+    
+    second_group <- unique(filtered_metadata()$group)[unique(filtered_metadata()$group) == selected_conditions()[1]]
+    
+    condition2_names <- filtered_metadata() %>%
+      filter(group == second_group) %>%
+      pull(intensity_sample_name)
+    
+    intensity_names <- c(condition1_names, condition2_names)
+    
     return(intensity_names)
   })
   
-  unique <- reactive({
-    
-    conditions <- c(input$condition1, input$condition2)
-    replicas_condicion1 <- input$repcond1
-    replicas_condicion2 <- input$repcond2
+  unique_proteins_reactive <- reactive({
+
     if (input$labeltype == 2){ #We add this detail in order to get rid of the proteins that have NAs in all the measurements with TMT label. Only quantified proteins remain
-     data_quick <-  data_quick()[rowSums(is.na(data_quick()[, cond.names()])) != length(cond.names()), ]
+      data_quick_upf <-  data_quick_upf()[rowSums(is.na(data_quick_upf()[, cond.names()])) != length(cond.names()), ]
     }
-    unique_proteins <- obtain_unique_proteins(data_quick(), conditions, LOG2.names(), replicas_condicion1, replicas_condicion2)
-    if (input$uniquefilter == TRUE){
-      
-      unique_proteins <- lapply(unique_proteins, unique_peptides_filter,input$condition1, input$condition2, input$numberuniquepep, input$comptplatform)
-      
-    }
+    unique_proteins <- obtain_unique_proteins(data_quick_upf(), filtered_metadata(), selected_conditions())
+
     
     return(unique_proteins)
   })
   
   unique_control <- reactive({
-    unique_proteins <- as.data.frame(unique()[1], check.names = FALSE)
+    unique_proteins <- as.data.frame(unique_proteins_reactive()[1], check.names = FALSE)
     return(unique_proteins)
   })
   
   unique_treatment <- reactive({
-    unique_proteins <- as.data.frame(unique()[2], check.names = FALSE)
+    unique_proteins <- as.data.frame(unique_proteins_reactive()[2], check.names = FALSE)
     return(unique_proteins)
   })
   
   data_filtered <- reactive({
-    
-    conditions <- c(input$condition1, input$condition2)
-    min_count <- c(input$minfiltro, input$minfiltro)
-    df.F <- filter_valids(data_quick(), unique(), conditions, min_count, at_least_one <- FALSE, LOG2.names(), input$labeltype)
+    df.F <- filter_valids(data_quick_upf(), filtered_metadata(), unique_proteins_reactive(), input$min_prop, at_least_one <- FALSE, input$labeltype)
     if (input$uniquefilter == TRUE){
       
-      df.F <- unique_peptides_filter(df.F, input$condition1, input$condition2, input$numberuniquepep, input$comptplatform)
+      df.F <- unique_peptides_filter(df.F, filtered_metadata(), input$numberuniquepep, input$proportionsamples)
     }
     return(df.F)
     
@@ -867,17 +988,33 @@ server <- function(input, output) {
   
   
   output$LOG2.names <- renderTable({
-    LOG2.names <- obtain_LOG.names(data_quick())
-   
+    tryCatch({
+      LOG2.names <- obtain_LOG.names(data_quick())
+      LOG2.names
+    }, error = function(e) {
+      # Return a data frame with a message in case of error
+      data.frame(Message = "Something has gone wrong, check for the settings chosen.")
+    })
   }, striped = TRUE, align = "c", bordered = TRUE)
-  
   
 
   #Proteins identified
   proteins_identified <- reactive({
-    identify_proteins(data_quick(), cond.names(), input$comptplatform, input$repcond1, input$repcond2)
+    identify_proteins(data_quick(), filtered_metadata(), input$comptplatform, selected_conditions())
     
   })
+  
+  output$downloadprotquant <- downloadHandler(
+    filename = function() {
+      paste("Proteins_quantified", ".", "tiff", sep = "")
+    },
+    content = function(file) {
+      
+      tiff(file, width = 12, height = 10, units = "in", res = 400)
+      print(identify_proteins(data_quick(), filtered_metadata(), input$comptplatform, selected_conditions()))
+      dev.off()
+    }
+  )
   
   output$protident <- renderPlot({
   try(proteins_identified(), silent = TRUE)
@@ -886,7 +1023,7 @@ server <- function(input, output) {
   #Venn plot
   
   venn_diagram_plot <- reactive({
-    grid.draw(venn_diagram(data_filtered(), unique(), input$condition1venn, input$condition2venn, input$color1, input$color2))
+    grid.draw(venn_diagram(data_filtered(), unique_proteins_reactive(), input$condition1venn, input$condition2venn, input$color1, input$color2))
     
   })
   output$venn <- renderPlot({
@@ -900,7 +1037,7 @@ server <- function(input, output) {
     content = function(file) {
       
       tiff(file, width = 12, height = 10, units = "in", res = 400)
-      grid.draw(venn_diagram(data_filtered(), unique(), input$condition1venn, input$condition2venn, input$color1, input$color2))
+      grid.draw(venn_diagram(data_filtered(), unique_proteins_reactive(), input$condition1venn, input$condition2venn, input$color1, input$color2))
       dev.off()
     }
   )
@@ -909,7 +1046,7 @@ server <- function(input, output) {
   
   #Distribution plots
   boxplot_distribution <- reactive({
-    boxplot_function(data(), cond.names(), cex.axis = 0.5)
+    boxplot_function(data(), filtered_metadata(), selected_conditions(), cex.axis = 0.5)
     
   })
   
@@ -917,14 +1054,14 @@ server <- function(input, output) {
     if (input$displaydistplots == 1) {
       boxplot <- try(boxplot_distribution(), silent = TRUE)
     } else if (input$displaydistplots == 2) {
-      try(plotCV2(data()[,cond.names()],  trend = TRUE, main = "Dispersion check", cex = 0.2, pch = 16, xlab="Average log-intensity", ylab=expression("Relative standard deviation")), silent = TRUE)
+      try(plotCV2(data()[,LOG2.names()],  trend = TRUE, main = "Dispersion check", cex = 0.2, pch = 16, xlab="Average log-intensity", ylab=expression("Relative standard deviation")), silent = TRUE)
     }
     
   })
   
   #Imputation plots 
   pre_imp_plot <- reactive({
-    preimputation_state(data_filtered(), cond.names())
+    preimputation_state(data_filtered(), filtered_metadata()$log2_col)
   })
   
   output$preimputationplot <- renderPlot({
@@ -932,7 +1069,7 @@ server <- function(input, output) {
         try(pre_imp_plot(), silent = TRUE)
       
     } else if (input$displayimpplots == 2) {
-      try(postimputation_state(data(), cond.names()), silent = TRUE)
+      try(postimputation_state(data_filtered(), input$imputation ,filtered_metadata()$log2_col), silent = TRUE)
     }
    
   })
@@ -949,10 +1086,10 @@ server <- function(input, output) {
   
   output$pcaplot <- renderPlot({
     if (input$dimreduction == 1) {
-      try(pca(data(),cond.names(), input$repcond1, input$repcond2), silent = TRUE)
+      try(pca(data(),filtered_metadata(), selected_conditions()), silent = TRUE)
     } else if (input$dimreduction == 2) {
       print("Running t-SNE...")  # Debugging message
-      tsne(data(), cond.names(), input$repcond1, input$repcond2,  perplexity_num = input$perplexitytsne)
+      tsne(data(), filtered_metadata(),  perplexity_num = input$perplexitytsne, selected_conditions())
     }
   })
   
@@ -961,7 +1098,7 @@ server <- function(input, output) {
     if (input$displaydistplots == 1) {
       boxplot <- try(boxplot_distribution(), silent = TRUE)
     } else if (input$displaydistplots == 2) {
-      try(plotCV2(data()[,cond.names()],  trend = TRUE, main = "Dispersion check", cex = 0.2, pch = 16, xlab="Average log-intensity", ylab=expression("Relative standard deviation")), silent = TRUE)
+      try(plotCV2(data()[,LOG2.names()],  trend = TRUE, main = "Dispersion check", cex = 0.2, pch = 16, xlab="Average log-intensity", ylab=expression("Relative standard deviation")), silent = TRUE)
     }
     
   })
@@ -969,7 +1106,7 @@ server <- function(input, output) {
   #Scatter plot
   
   correlation_plot <- reactive({
-    corrplot_function(data()[cond.names()], input$dispmethod)
+    corrplot_function(data()[filtered_metadata()$log2_col], input$dispmethod)
   
   })
   
@@ -1000,12 +1137,11 @@ server <- function(input, output) {
     content = function(file) {
       if (input$qualitymetricsplotchoice == 1) {
         tiff(file, width = 12, height = 10, units = "in", res = 400)
-        boxplot_function(data(), cond.names(), cex.axis = 0.5)
+        boxplot_function(data(), filtered_metadata(), selected_conditions(), cex.axis = 0.5)
         dev.off()
       } else if (input$qualitymetricsplotchoice == 2) {  
         tiff(file, width = 5, height = 4, units = "in", res = 300)
-        plotCV2(
-          data()[, cond.names()],
+          plotCV2(data()[,LOG2.names()],
           trend = TRUE,
           main = "Dispersion check",
           cex = 0.2,
@@ -1016,11 +1152,12 @@ server <- function(input, output) {
       
       } else if (input$qualitymetricsplotchoice == 3) {
         tiff(file, width = 12, height = 10, units = "in", res = 400)
-        preimputation_state(data_filtered(), cond.names())
+        preimputation_state(data_filtered(), LOG2.names())
         dev.off()
       } else if (input$qualitymetricsplotchoice == 4) {
         tiff(file, width = 12, height = 10, units = "in", res = 400)
-        postimputation_state(data(), cond.names())
+        dist_plot <- postimputation_state(data_filtered(), input$imputation ,LOG2.names())
+        print(dist_plot)
         dev.off()
       } else if (input$qualitymetricsplotchoice == 5) {
         tiff(file, width = 12, height = 10, units = "in", res = 400)
@@ -1036,15 +1173,16 @@ server <- function(input, output) {
         dev.off()
       } else if (input$qualitymetricsplotchoice == 8) {
         tiff(file, width = 12, height = 10, units = "in", res = 400)
-        correlation_plot()
+        corrplot_function(data()[filtered_metadata()$log2_col], input$dispmethod)
+        print(correlation_plot())
         dev.off()
       } else if (input$qualitymetricsplotchoice == 9) {
         tiff(file, width = 12, height = 10, units = "in", res = 400)
-        pca(data(),cond.names(), input$repcond1, input$repcond2)
+        pca(data(),filtered_metadata(), selected_conditions())
         dev.off()
       }else if (input$qualitymetricsplotchoice == 10) {
         tiff(file, width = 12, height = 10, units = "in", res = 400)
-        print(tsne(data(),cond.names(), input$repcond1, input$repcond2, perplexity_num = input$perplexitytsne))
+        print(tsne(data(), filtered_metadata(),  perplexity_num = input$perplexitytsne, selected_conditions()))
         dev.off()
       }
     }
@@ -1056,7 +1194,8 @@ server <- function(input, output) {
   difexpression <- reactive({
     validate(need(!is.null(input$pvaladj),
                   "Please select an option"))
-    statistic_dataframe <- statistical_analysis(data(), LOG2.names(), input$displaytest, input$testid, input$repcond1, input$repcond2, input$condition1, input$condition2, input$LogFCup, input$LogFCdown, input$sigcutoff, input$pvaladj, input$statselected, unique(), input$proteins, input$PSMaware, input$comptplatform)
+
+    statistic_dataframe <- statistical_analysis(data(), input$displaytest, input$testid, filtered_metadata(), input$LogFCup, input$LogFCdown, input$sigcutoff, input$pvaladj, input$statselected, unique_proteins_reactive(), input$proteins, input$PSMaware, input$comptplatform, selected_conditions(), diann_dir = if (input$comptplatform == 3) selected_dir() else NULL)
     
     statistic_dataframe <- statistic_dataframe[, !(names(statistic_dataframe) %in% "Protein_description")] #In order to avoid losing "Protein_description" to "Protein_description_X or Y " and turn it into non detectable column 
     merged <- merge(total_dataset(), statistic_dataframe, by = "Protein")
@@ -1117,10 +1256,11 @@ server <- function(input, output) {
   
   output$downloaddif <- downloadHandler(
     filename = function() {
-      paste(input$namedownload, Sys.Date(), ".xlsx", sep = "")
+      paste(input$namedownload, Sys.Date(), ".csv", sep = "")
     },
     content = function(file) {
-      writexl::write_xlsx(difexpression(), file)
+      write.csv(difexpression(), file)
+      #writexl::write_xlsx(difexpression(), file)
     }
     
   )
@@ -1134,7 +1274,7 @@ server <- function(input, output) {
   })
   
   volcano_tiff <- reactive({
-    volcano <- volcano_plot_tiff(difexpression(), input$volcanotitle, input$statselected, input$PSMaware)
+    volcano <- volcano_plot_tiff(difexpression(), input$volcanotitle, input$labelprots, input$statselected, input$PSMaware)
     return(volcano)
   })
   
@@ -1149,22 +1289,22 @@ server <- function(input, output) {
     content = function(file) {
       if (input$difextension == "tiff"){
         tiff(file, width = 12, height = 10, units = "in", res = 400)
-        p <- volcano_plot_tiff(difexpression(), input$volcanotitle, input$statselected, input$PSMaware)
+        p <- volcano_plot_tiff(difexpression(), input$volcanotitle, input$labelprots, input$statselected, input$PSMaware)
         print(p)
         dev.off()
       } else if (input$difextension == "pdf") {
         pdf(file, width = 12, height = 10, units = "in", res = 400)
-        p <- volcano_plot_tiff(difexpression(), input$volcanotitle, input$statselected, input$PSMaware)
+        p <- volcano_plot_tiff(difexpression(), input$volcanotitle, input$labelprots, input$statselected, input$PSMaware)
         print(p)
         dev.off()
       } else if (input$difextension == "jpeg"){
         jpeg(file, width = 12, height = 10, units = "in", res = 400)
-        p <- volcano_plot_tiff(difexpression(), input$volcanotitle, input$statselected, input$PSMaware)
+        p <- volcano_plot_tiff(difexpression(), input$volcanotitle, input$labelprots, input$statselected, input$PSMaware)
         print(p)
         dev.off()
       } else if (input$difextension == "png"){
         png(file, width = 12, height = 10, units = "in", res = 400)
-        p <- volcano_plot_tiff(difexpression(), input$volcanotitle, input$statselected, input$PSMaware)
+        p <- volcano_plot_tiff(difexpression(), input$volcanotitle, input$labelprots, input$statselected, input$PSMaware)
         print(p)
         dev.off()
       }
@@ -1174,14 +1314,13 @@ server <- function(input, output) {
   
   #Heatmap
   heatmap <- reactive({
-    heatmap <- my_heatmap(data(), cond.names(), input$heatmaptitle)
+    heatmap <- my_heatmap(data(), filtered_metadata()$log2_col, input$heatmaptitle)
     return(heatmap)
   })
   
   output$heatmapplot <- renderPlot({
     tryCatch({
-      # Your normal plot code here
-      heatmap(your_data)
+      heatmap()
       
     }, error = function(e) {
       # Show a blank plot with a custom message
@@ -1199,19 +1338,19 @@ server <- function(input, output) {
     content = function(file) {
       if (input$difextension == "tiff"){
         tiff(file, width = 12, height = 10, units = "in", res = 400)
-        my_heatmap(data(), cond.names(), input$heatmaptitle)
+        my_heatmap(data(), LOG2.names(), input$heatmaptitle)
         dev.off()
       } else if (input$difextension == "pdf") {
         pdf(file, width = 12, height = 10, units = "in", res = 400)
-        my_heatmap(data(), cond.names(), input$heatmaptitle)
+        my_heatmap(data(), LOG2.names(), input$heatmaptitle)
         dev.off()
       } else if (input$difextension == "jpeg"){
         jpeg(file, width = 12, height = 10, units = "in", res = 400)
-        my_heatmap(data(), cond.names(), input$heatmaptitle)
+        my_heatmap(data(), LOG2.names(), input$heatmaptitle)
         dev.off()
       } else if (input$difextension == "png"){
         png(file, width = 12, height = 10, units = "in", res = 400)
-        my_heatmap(data(), cond.names(), input$heatmaptitle)
+        my_heatmap(data(), LOG2.names(), input$heatmaptitle)
         dev.off()
       }
     }
@@ -1222,7 +1361,7 @@ server <- function(input, output) {
   #Differential heatmap
   
   diff_heatmap <- reactive({
-    diff_heatmap <- my_heatmap_differential(difexpression(),data(), cond.names(), input$heatmaptitle)
+    diff_heatmap <- my_heatmap_differential(difexpression(),data(), filtered_metadata()$log2_col, input$heatmaptitle)
     return(diff_heatmap)
   })
   
@@ -1247,19 +1386,19 @@ server <- function(input, output) {
     content = function(file) {
       if (input$difextension == "tiff"){
         tiff(file, width = 12, height = 10, units = "in", res = 400)
-        my_heatmap_differential(difexpression(),data(), cond.names(), input$heatmaptitle)
+        my_heatmap_differential(difexpression(),data(), filtered_metadata()$log2_col, input$heatmaptitle)
         dev.off()
       } else if (input$difextension == "pdf") {
         pdf(file, width = 12, height = 10, units = "in", res = 400)
-        my_heatmap_differential(difexpression(),data(), cond.names(), input$heatmaptitle)
+        my_heatmap_differential(difexpression(),data(), filtered_metadata()$log2_col, input$heatmaptitle)
         dev.off()
       } else if (input$difextension == "jpeg"){
         jpeg(file, width = 12, height = 10, units = "in", res = 400)
-        my_heatmap_differential(difexpression(),data(), cond.names(), input$heatmaptitle)
+        my_heatmap_differential(difexpression(),data(), filtered_metadata()$log2_col, input$heatmaptitle)
         dev.off()
       } else if (input$difextension == "png"){
         png(file, width = 12, height = 10, units = "in", res = 400)
-        my_heatmap_differential(difexpression(),data(), cond.names(), input$heatmaptitle)
+        my_heatmap_differential(difexpression(),data(), filtered_metadata()$log2_col, input$heatmaptitle)
         dev.off()
       }
     }
@@ -1268,7 +1407,7 @@ server <- function(input, output) {
   #Differential Boxplot
   dif_boxplot <- reactive({
     
-    dif_boxplot <- Diferential_boxplot(data(), first_condition = input$condition1, second_condition = input$condition2, protein = input$proteinname, LOG2.names())
+    dif_boxplot <- Diferential_boxplot(data(), filtered_metadata(), protein = input$proteinname, LOG2.names(), selected_conditions())
     
     return(dif_boxplot)
     
@@ -1473,15 +1612,17 @@ server <- function(input, output) {
   
   ##### ====== Download report ====== #####
   
-  output$downloadReport <- downloadHandler(
+  output$downloadreport <- downloadHandler(
     # For PDF output, change this to "report.pdf"
-    filename = "report.html",
+    filename = function() {
+      paste("report-", Sys.Date(), ".pdf", sep = "")
+    },
     content = function(file) {
       # Copy the report file to a temporary directory before processing it, in
       # case we don't have write permissions to the current working dir (which
       # can happen when deployed).
       tempReport <- file.path(tempdir(), "Downstreaming_Analysis_report.Rmd")
-      file.copy("../Downstreaming_Analysis_report.Rmd", tempReport, overwrite = TRUE)
+      file.copy("report.Rmd", tempReport, overwrite = TRUE)
       
       # Set up parameters to pass to Rmd document
       params <- list(
