@@ -51,9 +51,10 @@ if(!require(Rtsne)){install.packages("Rtsne")}
 library(Rtsne)
 if(!require(remotes)){install.packages("remotes")}
 library(remotes)
-renv::install(remotes::install_github("vdemichev/diann-rpackage"))
-library(diann)
-
+if(!require(data.table)){install.packages("data.table")}
+library(data.table)
+if(!require(tidyverse)){install.packages("tidyverse")}
+library(tidyverse)
 
 #Installing bioconductor packages: 
 if(!require(rsconnect)){BiocManager::install("rsconnect",update=F,ask=F)}
@@ -90,7 +91,8 @@ library(STRINGdb)
 ##################################################################################
 #Quick filtering
 
-quick_filtering <- function(raw, input, platform, organism, condition1, condition2){
+quick_filtering <- function(raw, platform, organism, metadata, selected_conditions, directory_path = NULL){
+  intensity_names <- metadata$intensity_sample_name
   if (platform == 1){
     df <- raw %>%
       filter(Potential.contaminant != "+") %>% 
@@ -119,26 +121,15 @@ quick_filtering <- function(raw, input, platform, organism, condition1, conditio
     }
     
     #Hacemos la log-transformaci?n
-    if (input == "lfq"){
-      intensity_names <- grep("LFQ.intensity", colnames(df), value = TRUE)
+
       df[intensity_names] <- sapply(df[intensity_names], as.numeric) 
-      LOG2.names <- sub("^LFQ.intensity", "LOG2", intensity_names)
-      df[LOG2.names] <- log2(df[intensity_names])
-    } else if (input == "int"){
-      intensity_names <- grep("^Intensity", colnames(df), value = TRUE)
-      df[intensity_names] <- sapply(df[intensity_names], as.numeric) 
-      LOG_names <- sub("^Intensity", "LOG2", intensity_names)
+      LOG_names <- sub("Intensity", "LOG2", intensity_names)
       df[LOG_names] <- log2(df[intensity_names])
-    } else if (input == "spcount"){
-      spectral_names <- grep("MS.MS.count", colnames(df), value = TRUE)
-      df[spectral_names] <- sapply(df[spectral_names], as.numeric) 
-      LOG_names <- paste("LOG2", spectral_names)
-      df[LOG_names] <- log2(df[spectral_names])
-    }
+
     return(df)
       
     } else if (platform == 2){
-      df <- raw 
+      df <- raw
       
       if (organism == 1){
         regex <- regexpr(".*(?=.CGDID)", df$Protein.ID, perl = TRUE)
@@ -161,31 +152,17 @@ quick_filtering <- function(raw, input, platform, organism, condition1, conditio
         colnames(df)[3] <- "Protein_description"
       }
   
-      if (input == "lfq"){
-        intensity_names <- grep("MaxLFQ.Intensity", colnames(df), value = TRUE)
         df[intensity_names] <- sapply(df[intensity_names], as.numeric) 
-        LOG2.names <- sub("MaxLFQ.Intensity", "LOG2", intensity_names)
-        #df[LOG2.names] <- log2(df[intensity_names])
-        df[LOG2.names] <- lapply(df[intensity_names], log2)
-      } else if (input == "int"){
-        intensity_names <- grep("Intensity", colnames(df), value = TRUE)
-        df[intensity_names] <- sapply(df[intensity_names], as.numeric) 
-        LOG2.names <- sub("Intensity", "LOG2", intensity_names)
+        LOG2.names <- metadata
         df[LOG2.names] <- log2(df[intensity_names])
-      } else if (input == "spcount"){
-        spectral_names <- grep("Total.Spectral.Count", colnames(df), value = TRUE)
-        df[spectral_names] <- sapply(df[spectral_names], as.numeric) 
-        LOG2.names <- sub("Total", "LOG2", spectral_names)
-        df[LOG2.names] <- log2(df[spectral_names])
-        
-      }
+
       return(df)
     } else if (platform == 3){
       df <- raw 
       colnames(df)[1] <- "Protein"
       colnames(df)[3] <- "Protein_description"
       
-      intensity_columns <- grepl("\\.d", colnames(df)) 
+      intensity_columns <- grepl("\\.(d|raw)$", colnames(df)) 
       intensity_columns <- colnames(df[intensity_columns])
       
       #Le damos un lavado 
@@ -196,13 +173,13 @@ quick_filtering <- function(raw, input, platform, organism, condition1, conditio
       }
       
       colnames(df)[length(colnames(df)) - (length(intensity_columns)-1):length(colnames(intensity_columns))] <- new_names
-      intensity_names <- grep("\\.d", colnames(df), value = TRUE)
+      intensity_names <- grep("\\.(d|raw)$", colnames(df), value = TRUE)
       df[intensity_names] <- sapply(df[intensity_names], as.numeric) 
-      LOG2.names <- sub("\\.d", ".LOG2", intensity_names)
+      LOG2.names <- sub("\\.(d|raw)$", ".LOG2", intensity_names)
       df[LOG2.names] <- log2(df[intensity_names])
       
       ##############################################################################################################
-      DIANN_report <- diann_load("report.tsv")
+      DIANN_report <- fread(file.path(directory_path, "report.tsv"), sep = "\t", stringsAsFactors = FALSE, colClasses = "character", check.names = FALSE)
       samples <- unique(DIANN_report$Run)[order(unique(DIANN_report$Run))]
       DIANN_report <- DIANN_report %>% #Filtramos por FDR del 1%
         filter(Q.Value < 0.01)
@@ -269,7 +246,7 @@ quick_filtering <- function(raw, input, platform, organism, condition1, conditio
       #colnames(peptide_counts_df)[1] <- "Var"
       
       #merged_peptide_counts <- merge(merged_peptide_counts, peptide_counts_df, by = "Var", all = FALSE)
-
+      
       # Modify the names
       
       colnames(merged_unique_peptide_counts)[2:(length(LOG2.names) +1)] <- paste("Unique peptides", colnames(merged_unique_peptide_counts)[2:(length(LOG2.names) +1)], sep=" ")
@@ -283,21 +260,26 @@ quick_filtering <- function(raw, input, platform, organism, condition1, conditio
       
       
       # Sample names
-      conditions1 <- c(condition1, condition2)
-      condition1_names <- grep(conditions1[1], samples, value = TRUE)
-      condition2_names <- grep(conditions1[2], samples, value = TRUE)
-      sample_names <- c(condition1_names,condition2_names) 
+      first_group <- unique(metadata$group)[unique(metadata$group) == selected_conditions[2]]
       
-      # Identify columns for each condition
-      condition_1 <- grep(condition1, LOG2.names, value = TRUE) 
-      condition_2 <- grep(condition2, LOG2.names, value = TRUE) 
+      condition1_names <- metadata %>%
+        filter(group == first_group) %>%
+        pull(log2_col)
+      
+      second_group <- unique(metadata$group)[unique(metadata$group) == selected_conditions[1]]
+      
+      
+      condition2_names <- metadata %>%
+        filter(group == second_group) %>%
+        pull(log2_col)
+      
       
       # Calculate non-NA counts for each condition separately
       df <- df %>%  #Se coge la variable del codigo
         rowwise() %>%
         mutate(
-          counts_condition1 = sum(!is.na(c_across(all_of(condition_1)))),
-          counts_condition2 = sum(!is.na(c_across(all_of(condition_2))))
+          counts_condition1 = sum(!is.na(c_across(all_of(condition1_names)))),
+          counts_condition2 = sum(!is.na(c_across(all_of(condition2_names))))
         ) %>%
         ungroup()
       
@@ -315,7 +297,7 @@ quick_filtering <- function(raw, input, platform, organism, condition1, conditio
     } else if (platform == 4){
       df <- raw
       
-      abundance_names <- grep("Abundance:", colnames(df), value = TRUE)
+      abundance_names <- grep("Abundance:", intensity_names, value = TRUE)
       df[abundance_names] <- sapply(df[abundance_names], as.numeric) 
       LOG2.names <- sub("^Abundance:", "LOG2", abundance_names)
       df[LOG2.names] <- log2(df[abundance_names])
@@ -339,14 +321,12 @@ quick_filtering <- function(raw, input, platform, organism, condition1, conditio
         
       colnames(df)[1] <- "Protein"
       colnames(df)[4] <- "Protein_description"
-  
-      
-      if (input == "int"){
-        intensity_names <- grep(".Intensity", colnames(df), value = TRUE)
+
+
         df[intensity_names] <- sapply(df[intensity_names], as.numeric) 
-        LOG2.names <- sub(".Intensity", ".LOG2", intensity_names)
+        LOG2.names <- sub("Intensity", ".LOG2", intensity_names)
         df[LOG2.names] <- log2(df[intensity_names])
-      } 
+       
       return(df)
       
     }
@@ -368,9 +348,28 @@ obtain_LOG.names <- function(df){
 ##################################################################################
 #Subseting unique proteins for each condition
 
-obtain_unique_proteins <- function(df, conditions, LOG2.names, replicas_condicion1, replicas_condicion2){
-  cond.names <- lapply(conditions, function(x) grep(x, LOG2.names, value = TRUE, perl = TRUE))
-  condi_names <- unlist(cond.names)
+obtain_unique_proteins <- function(df, metadata, selected_conditions){
+  
+  first_group <- unique(metadata$group)[unique(metadata$group) == selected_conditions[2]]
+  
+  condition1_names <- metadata %>%
+    filter(group == first_group) %>%
+    pull(log2_col)
+  
+  replicas_condicion1 <- length(condition1_names)
+  print(replicas_condicion1)
+  
+  second_group <- unique(metadata$group)[unique(metadata$group) == selected_conditions[1]]
+  
+  condition2_names <- metadata %>%
+    filter(group == second_group) %>%
+    pull(log2_col)
+  
+  replicas_condicion2 <- length(condition2_names)
+  print(replicas_condicion2)
+  
+  
+  condi_names <- c(condition1_names,condition2_names)
   
   df2 <- df[condi_names]
   df2 <- as.matrix(df2)
@@ -388,7 +387,7 @@ obtain_unique_proteins <- function(df, conditions, LOG2.names, replicas_condicio
   
   cond2_exclusive <- Reduce(`|`, lapply(1:replicas_condicion2, function(i) {
     condition <- finite_sums == 0 & infinite_sums == (replicas_condicion2 - i)
-    sufficient_presence <- infinite_sums < ceiling(replicas_condicion2 / 2)
+    sufficient_presence <- infinite_sums <= ceiling(replicas_condicion2 / 2)
     condition & sufficient_presence
   }))
   
@@ -403,7 +402,21 @@ obtain_unique_proteins <- function(df, conditions, LOG2.names, replicas_condicio
 
 ##################################################################################
 #Proteins identified
-identify_proteins <- function(raw, condi.names, platform, repcond1, repcond2) {
+identify_proteins <- function(raw, metadata, platform, selected_conditions) {
+  
+  first_group <- unique(metadata$group)[unique(metadata$group) == selected_conditions[2]]
+  
+  condition1_names <- metadata %>%
+    filter(group == first_group) %>%
+    pull(intensity_sample_name)
+  
+  second_group <- unique(metadata$group)[unique(metadata$group) == selected_conditions[1]]
+  
+  condition2_names <- metadata %>%
+    filter(group == second_group) %>%
+    pull(intensity_sample_name)
+  
+  condi.names <- c(condition1_names,condition2_names)
   
   # Step 1: Initialization
   long <- length(condi.names)  # Number of conditions
@@ -431,7 +444,7 @@ identify_proteins <- function(raw, condi.names, platform, repcond1, repcond2) {
     ylab = "Total proteins",
     cex.names = 0.5,
     names.arg = condi.names,
-    col = c(rep("light green", repcond1), rep("light blue", repcond2)),
+    col = c(rep("light green", length(condition1_names)), rep("light blue", length(condition2_names))),
     las = 2,
     ylim = c(0, max(proteins) + 200)
   )
@@ -471,132 +484,123 @@ venn_diagram <- function(df, unique_proteins, label1, label2, color1, color2){
 ##################################################################################
 #Filtering
 
-filter_valids <- function(df, unique_proteins, conditions1, min_count, at_least_one = FALSE, LOG2.names, labeltype) {
+filter_valids <- function(df, metadata, unique_proteins, min_prop = NULL,
+                          at_least_one = FALSE, labeltype = 1) {
   
+  groups <- unique(metadata$group)
+  if (length(groups) < 2) stop("You need at least two conditions.")
   
-  cond.names <- lapply(conditions1, # Sobre la lista conditions, aplicamos una funcion quedarnos con las columnas de las condiciones con datos en log
-                       function(x) grep(x, LOG2.names, value = TRUE, perl = TRUE))
-  print(cond.names)
+  cond.names <- lapply(groups, function(g) {
+    metadata %>%
+      filter(group == g) %>%
+      pull(log2_col)
+  })
+  names(cond.names) <- groups
   
+  min_count <- sapply(cond.names, function(cols) ceiling(length(cols) * min_prop))
+
+  # Remove unique proteins
   total_unique_proteins <- rbind(unique_proteins[[1]], unique_proteins[[2]])
-  #common_df <- df%>%
-  #  filter(df$Protein != total_unique_proteins$Protein[1])
-  
   if (nrow(total_unique_proteins) > 0) {
     common_df <- df %>%
-      filter(df$Protein != total_unique_proteins$Protein[1])
+      filter(!Protein %in% total_unique_proteins$Protein)
   } else {
-    common_df <- df  # No filtering needed if total_unique_proteins is empty
+    common_df <- df
   }
   
-  for (i in total_unique_proteins$Protein){
-    common_df <- common_df%>%
-      filter(common_df$Protein != i)
-  }
-  
-  if (labeltype == 1){
-    
-  
-    cond.filter <- sapply(1:length(cond.names), function(i) { 
-      df2 <- common_df[cond.names[[i]]]   
-      df2 <- as.matrix(df2) 
-      sums <- rowSums(is.finite(df2))  
-      sums >= min_count[i]   
+  if (labeltype == 1) {
+    # Filter by non-NA counts per condition
+    cond.filter <- sapply(seq_along(cond.names), function(i) {
+      mat <- as.matrix(common_df[cond.names[[i]]])
+      rowSums(is.finite(mat)) >= min_count[i]
     })
-    if (at_least_one) {
-      common_df$KEEP <- apply(cond.filter, 1, any)
+    
+    common_df$KEEP <- if (at_least_one) {
+      apply(cond.filter, 1, any)
     } else {
-      common_df$KEEP <- apply(cond.filter, 1, all)
+      apply(cond.filter, 1, all)
     }
-    common_df <- filter(common_df, KEEP)
     
-    common_df[LOG2.names] <- lapply(LOG2.names,
-                                    function(x) {
-                                      temp <- common_df[[x]]
-                                      temp[!is.finite(temp)] = NA
-                                      return(temp)
-                                      
-                                    })
+    common_df <- common_df %>% filter(KEEP)
     
-    condition1_names <- cond.names[[1]] 
-    condition2_names <- cond.names[[2]]
-    
-    for (i in 1:nrow(common_df)) { 
-      valuesA <- as.numeric(common_df[i, condition1_names])
-      valuesB <- as.numeric(common_df[i, condition2_names])
-      valuesC <- c(valuesA, valuesB)
-      cv1 <- (sd(valuesA, na.rm = TRUE) / mean(valuesA, na.rm = TRUE)) * 100
-      cv2 <- (sd(valuesB, na.rm = TRUE) / mean(valuesB, na.rm = TRUE)) * 100
-      cv3 <- (sd(valuesC, na.rm = TRUE) / mean(valuesC, na.rm = TRUE)) * 100
-      common_df$CV_Control[i] <- cv1
-      common_df$CV_Tratamiento[i] <- cv2
-      common_df$CV_TratamientoyControl[i] <- cv3
-    
-      }
-  
-  } else if (labeltype ==2){
+    # Replace non-finite values with NA
+    cols_to_modify <- unlist(cond.names)
+    common_df[cols_to_modify] <- lapply(common_df[cols_to_modify], function(col) {
+      col[!is.finite(col)] <- NA
+      return(col)
+    })
+  } else if (labeltype == 2) {
+    # Label-based: remove missing (assumes external function)
     common_df <- df
     common_df <- remove_missing(common_df)
-    
-    condition1_names <- cond.names[[1]] 
-    condition2_names <- cond.names[[2]]
-    
-    for (i in 1:nrow(common_df)) { 
-      valuesA <- as.numeric(common_df[i, condition1_names])
-      valuesB <- as.numeric(common_df[i, condition2_names])
-      valuesC <- c(valuesA, valuesB)
-      cv1 <- (sd(valuesA, na.rm = TRUE) / mean(valuesA, na.rm = TRUE)) * 100
-      cv2 <- (sd(valuesB, na.rm = TRUE) / mean(valuesB, na.rm = TRUE)) * 100
-      cv3 <- (sd(valuesC, na.rm = TRUE) / mean(valuesC, na.rm = TRUE)) * 100
-      common_df$CV_Control[i] <- cv1
-      common_df$CV_Tratamiento[i] <- cv2
-      common_df$CV_TratamientoyControl[i] <- cv3
-      
-    }
   }
   
+  # ----------- Vectorized CV Calculation (for both label types) -------------
+  condition1_names <- cond.names[[1]]
+  condition2_names <- cond.names[[2]]
   
-  return(common_df)  
+  valuesA <- as.matrix(common_df[, condition1_names])
+  valuesB <- as.matrix(common_df[, condition2_names])
+  valuesC <- cbind(valuesA, valuesB)
+  
+  row_cv <- function(mat) {
+    row_means <- rowMeans(mat, na.rm = TRUE)
+    row_sds <- apply(mat, 1, sd, na.rm = TRUE)
+    cv <- (row_sds / row_means) * 100
+    cv[is.nan(cv)] <- NA
+    return(cv)
+  }
+  
+  common_df$CV_Control <- row_cv(valuesA)
+  common_df$CV_Tratamiento <- row_cv(valuesB)
+  common_df$CV_TratamientoyControl <- row_cv(valuesC)
+  # ---------------------------------------------------------------------------
+  
+  return(common_df)
 }
 
-unique_peptides_filter <- function(df, first_condition, second_condition, number, comptplatform) {
+
+unique_peptides_filter <- function(df, metadata, number, min_fraction) {
   
-  unique_peptides_column <- grep("Unique.peptides", colnames(df), value = TRUE)
-  # Process conditions: Remove ".LOG2" suffix & clean backslashes
-  conditions <- c(first_condition, second_condition) %>%
-    gsub("\\.LOG2$", "", .) %>%
-    gsub("\\\\$", "", .)
+  # Get sample column names per condition
+  groups <- unique(metadata$group)
+  if (length(groups) < 2) stop("You need at least two conditions.")
   
-  # Extract matching column names for each condition
-  condition_columns <- lapply(conditions, function(cond) {
-    unique_peptides_column[grepl(cond, unique_peptides_column, perl = TRUE)]
+  condition_columns <- lapply(groups, function(g) {
+    metadata %>%
+      filter(group == g) %>%
+      pull(unique_peptides_col)
   })
+  names(condition_columns) <- groups
   
-  names(condition_columns) <- conditions  # Label each group by condition
-  
-  filter_proteins_by_condition <- function(data) {
-    rowSums(data >= number, na.rm = TRUE) >= 2  # At least 2 samples in this condition
+  # Function to filter rows (proteins) based on min_fraction
+  filter_proteins_by_condition <- function(data_subset, condition_name) {
+    num_samples <- ncol(data_subset)
+    min_required <- ceiling(min_fraction * num_samples)
+    rowSums(data_subset >= number, na.rm = TRUE) >= min_required
   }
   
-  # Apply filtering within each condition
-  filtered_proteins_list <- lapply(condition_columns, function(cols) {
-    df[filter_proteins_by_condition(df[cols]), , drop = FALSE]
-  })
+  # Apply filtering per condition
+  filtered_proteins_list <- mapply(function(cols, cond_name) {
+    subset <- df[, cols, drop = FALSE]
+    keep_rows <- filter_proteins_by_condition(subset, cond_name)
+    df[keep_rows, , drop = FALSE]
+  }, condition_columns, names(condition_columns), SIMPLIFY = FALSE)
   
+  # Get union of proteins passing any condition
   all_filtered_proteins <- Reduce(union, lapply(filtered_proteins_list, rownames))
   
   if (length(all_filtered_proteins) == 0) {
     warning("No proteins meet the filtering criteria.")
-    return(data.frame())  # Return empty dataframe instead of NULL
+    return(data.frame())
   }
   
   df_filtered <- df[rownames(df) %in% all_filtered_proteins, ]
-  
-    
-    return(df_filtered)
-
-  
+  return(df_filtered)
 }
+
+
+
 ##################################################################################
 #Normalization 
 
@@ -693,7 +697,21 @@ plotCV2 <- function(y, trend = TRUE, main= "Imputation check", ...){
   return(res)
 }
 
-boxplot_function <- function(df, cond.names,  ...){
+boxplot_function <- function(df, metadata, selected_conditions, ...){
+  first_group <- unique(metadata$group)[unique(metadata$group) == selected_conditions[2]]
+  
+  condition1_names <- metadata %>%
+    filter(group == first_group) %>%
+    pull(log2_col)
+  
+  second_group <- unique(metadata$group)[unique(metadata$group) == selected_conditions[1]]
+  
+  condition2_names <- metadata %>%
+    filter(group == second_group) %>%
+    pull(log2_col)
+  
+  cond.names <- c(condition1_names, condition2_names)
+  
   df <- na.omit(df[cond.names])
   par(mfrow=c(1,1), font.lab=2, cex.lab=1, font.axis=2, cex.axis=1, cex.main=1, las = 1)
   boxplot(df[, cond.names], names = cond.names,  ylim = c(min(df[,cond.names])-1, max(df[,cond.names]) +1), main="Boxplot of Intensities", ylab = "Intensities", las=2,  ...)
@@ -702,13 +720,39 @@ boxplot_function <- function(df, cond.names,  ...){
 preimputation_state <- function(df, cond.names){
   
   par(mfrow=c(2,2))
-  aggr(df[, cond.names], delimiter = "NA", labels = names(df[cond.names]), cex.axis = .8)
+  aggr(df[, cond.names], delimiter = "NA", labels = names(df[cond.names]), cex.axis = 0.4)
 }
 
-postimputation_state <- function(df, cond.names){
+postimputation_state <- function(data_filtered, imputation, LOG2.names){
   
-  par(mfrow=c(2,2))
-  aggr(df[, cond.names], delimiter = "NA", labels = names(df[cond.names]), cex.axis = .8)
+  df_no_imputed <- data_filtered[LOG2.names] #quedarnos con columnas con intensidad LOG2
+  
+  if (imputation == 1) { 
+    data <- impute_KNN_data(as.data.frame(data_filtered), LOG2.names, k = 5)
+  } else if (imputation == 2){
+    data <- impute_data(as.data.frame(data_filtered), LOG2.names)
+    
+  }
+  
+  df_imputed <- data[LOG2.names] #Imputar y lo mismo
+  
+  # Convert to long format
+  df_imputed_long <- df_imputed %>%
+    pivot_longer(cols = starts_with("LOG2"), names_to = "Sample", values_to = "Intensity") %>%
+    mutate(Type = "Imputed")
+  
+  df_non_imputed_long <- df_no_imputed %>%
+    pivot_longer(cols = starts_with("LOG2"), names_to = "Sample", values_to = "Intensity") %>%
+    mutate(Type = "Original")
+  
+  
+  df_combined <- bind_rows(df_non_imputed_long, df_imputed_long)
+  
+  
+  ggplot(df_combined, aes(x = Intensity, fill = Type)) +
+    geom_density(alpha = 0.5) +
+    theme_minimal() +
+    labs(title = "Intensity Distributions: Imputed vs Original", x = "Intensity", y = "Density")
 }
 
 histogram <- function(df, colname, color, title){
@@ -749,13 +793,28 @@ corrplot_function <- function(df, display, tl.col = "black", addCoef.col = "blac
 #Differential expression analysis
 ##################################################################################
 #Limma function
-statistical_analysis <- function(df, LOG2.names,test, paired = FALSE, replicas_condicion1, replicas_condicion2, condition1, condition2, logfcup, logfcdown, sig, adjval, statval, unique_proteins, way, psms, platform){
+statistical_analysis <- function(df, test, paired = FALSE, metadata, logfcup, logfcdown, sig, adjval, statval, unique_proteins, way, psms, platform, selected_conditions, diann_dir = NULL){
+  
+  first_group <- unique(metadata$group)[unique(metadata$group) == selected_conditions[2]]
+  
+  condition1_names <- metadata %>%
+    filter(group == first_group) %>%
+    pull(log2_col)
+  
+  replicas_condicion1 <- length(condition1_names)
+  
+  second_group <- unique(metadata$group)[unique(metadata$group) == selected_conditions[1]]
+  
+  condition2_names <- metadata %>%
+    filter(group == second_group) %>%
+    pull(log2_col)
+  
+  replicas_condicion2 <- length(condition2_names)
+  
+  condi.names <- c(condition1_names,condition2_names)
   
   if (test == 2){
     if (psms == TRUE){
-      condition1_names <- grep(condition1, LOG2.names, value = TRUE)
-      condition2_names <- grep(condition2, LOG2.names, value = TRUE)
-      
       #Control columns
       for (i in 1:replicas_condicion1){
         nam <- paste("control_sample", i, sep = "")
@@ -812,20 +871,24 @@ statistical_analysis <- function(df, LOG2.names,test, paired = FALSE, replicas_c
         count_column <- replace(count_column, count_column==0, 1)
         fit.eb$count <- count_column 
         
-      } else if (platform == 3){ #DIA-NN #Antes Protein.Ids era Genes
-        DIANN_report <- diann_load("report.tsv") #Buscar la forma de cargar el report 
-        
-        data <- unique(DIANN_report[,c('Protein.Group','Stripped.Sequence')])
-        t_prueba <- table(data$Protein.Group)
-        
-        unique_peptides_info <- as.data.frame(t_prueba) #Listado de peptidos unicos por proteina. 
-        unique_peptides_info$Var1 <- as.character(unique_peptides_info$Var1)
-        
-        df$count <- NA
-        
-        match_indices <- match(df$Protein, unique_peptides_info$Var1)
-        fit.eb$count <- unique_peptides_info$Freq[match_indices]
-        
+      } else if (platform == 3) {
+        if (!is.null(diann_dir)) {
+          report_path <- file.path(diann_dir, "report.tsv")
+          if (file.exists(report_path)) {
+            DIANN_report <- fread(report_path, sep = "\t", stringsAsFactors = FALSE, colClasses = "character", check.names = FALSE)
+            data <- unique(DIANN_report[,c('Protein.Group','Stripped.Sequence')])
+            t_prueba <- table(data$Protein.Group)
+            unique_peptides_info <- as.data.frame(t_prueba)
+            unique_peptides_info$Var1 <- as.character(unique_peptides_info$Var1)
+            df$count <- NA
+            match_indices <- match(df$Protein, unique_peptides_info$Var1)
+            fit.eb$count <- unique_peptides_info$Freq[match_indices]
+          } else {
+            stop("DIA-NN report.tsv not found in the provided directory.")
+          }
+        } else {
+          stop("DIA-NN directory not provided.")
+        }
       } else if (platform == 4){ #Proteome Discoverer
         count_columns <- as.numeric(df$`# PSMs`)
         fit.eb$count <- count_columns
@@ -907,9 +970,6 @@ statistical_analysis <- function(df, LOG2.names,test, paired = FALSE, replicas_c
       }
       
     } else if (psms == FALSE){
-      condition1_names <- grep(condition1, LOG2.names, value = TRUE)
-      condition2_names <- grep(condition2, LOG2.names, value = TRUE)
-      
       #Control columns
       for (i in 1:replicas_condicion1){
         nam <- paste("control_sample", i, sep = "")
@@ -1013,8 +1073,6 @@ statistical_analysis <- function(df, LOG2.names,test, paired = FALSE, replicas_c
     }
     
   } else if (test == 1){
-    condition1_names <- grep(condition1, LOG2.names, value = TRUE)
-    condition2_names <- grep(condition2, LOG2.names, value = TRUE)
     
     valuesA_cols <- df[, condition1_names]
     valuesB_cols <- df[, condition2_names]
@@ -1041,9 +1099,6 @@ statistical_analysis <- function(df, LOG2.names,test, paired = FALSE, replicas_c
     
     
   } else if (test == 3){
-    condition1_names <- grep(condition1, LOG2.names, value = TRUE)
-    condition2_names <- grep(condition2, LOG2.names, value = TRUE)
-    
     valuesA_cols <- df[, condition1_names]
     valuesB_cols <- df[, condition2_names]
     
@@ -1183,7 +1238,7 @@ volcano_plot <- function(limma, title, label, statval, psms){
   }
   
 }
-volcano_plot_tiff <- function(limma, title, statval, psms){
+volcano_plot_tiff <- function(limma, title, label,  statval, psms){
   
   plot <- NULL  # Initialize
   
@@ -1195,7 +1250,7 @@ volcano_plot_tiff <- function(limma, title, statval, psms){
       
       plot <- ggplot(limma, aes(logFC, -log10(sca.P.Value))) +
         theme_light() +
-        geom_point(aes(color = expression), size = 2) +
+        geom_point(aes(color = expression), size = label) +
         scale_color_manual(values = c("green3", "gray78", "firebrick3")) +
         guides(colour = guide_legend(override.aes = list(size = 2.5))) +
         ggtitle(title) +
@@ -1261,7 +1316,25 @@ volcano_plot_tiff <- function(limma, title, statval, psms){
 }
 
 
-pca <- function(x, group, rep1, rep2){
+pca <- function(x, metadata, selected_conditions){
+  
+  first_group <- unique(metadata$group)[unique(metadata$group) == selected_conditions[2]]
+  
+  condition1_names <- metadata %>%
+    filter(group == first_group) %>%
+    pull(log2_col)
+  
+  rep1 <- length(condition1_names)
+  
+  second_group <- unique(metadata$group)[unique(metadata$group) == selected_conditions[1]]
+  
+  condition2_names <- metadata %>%
+    filter(group == second_group) %>%
+    pull(log2_col)
+  
+  rep2 <- length(condition2_names)
+  
+  group <- c(condition1_names,condition2_names)
   x <- na.omit(x[group])
   tdata<-t(x[group])
   
@@ -1277,7 +1350,25 @@ pca <- function(x, group, rep1, rep2){
   text(pc$x[,1], pc$x[,2],labels=rownames(pc$x),pos=3,offset=0.4,cex=0.7)
 }
 
-tsne <- function(x, group, rep1, rep2, perplexity_num){
+tsne <- function(x, metadata, perplexity_num, selected_conditions){
+  
+  first_group <- unique(metadata$group)[unique(metadata$group) == selected_conditions[2]]
+  
+  condition1_names <- metadata %>%
+    filter(group == first_group) %>%
+    pull(log2_col)
+  
+  rep1 <- length(condition1_names)
+  
+  second_group <- unique(metadata$group)[unique(metadata$group) == selected_conditions[1]]
+  
+  condition2_names <- metadata %>%
+    filter(group == second_group) %>%
+    pull(log2_col)
+  
+  rep2 <- length(condition2_names)
+  
+  group <- c(condition1_names,condition2_names)
   x <- na.omit(x[group])
   
   tdata<-as.data.frame(t(x[group]))
@@ -1293,7 +1384,7 @@ tsne <- function(x, group, rep1, rep2, perplexity_num){
     Dim1 = tsne$Y[, 1],
     Dim2 = tsne$Y[, 2],
     Sample = sample_names,
-    Group = rep(c("Control", "Treatment"), c(rep1, rep2)) #Mejorar como definimos los grupos
+    Group = rep(c(first_group, second_group), c(rep1, rep2)) #Mejorar como definimos los grupos
   )
   
   ggplot(tsne_df, aes(x = Dim1, y = Dim2, label = Sample, color = Group)) +
@@ -1330,50 +1421,54 @@ my_heatmap_differential <- function(limma, data, cond.names, title){
   heatmap <- heatmap(as.matrix(diferential[cond.names]),  labRow = diferential$Protein, main =title, Rowv = NULL, Colv = NA, col =greenred(75), cexCol = 0.6)
 
 }
-
-Diferential_boxplot <- function(df, first_condition, second_condition, protein, LOG2.names){
-  
+Diferential_boxplot <- function(df, metadata, protein, LOG2.names, selected_conditions){
   row.names(df) <- df$Protein
   
-  subset_data <- as.matrix(df[df$Protein == protein, c(LOG2.names)])
+  subset_data <- df[df$Protein == protein, c(LOG2.names)]
   
-  cond.colums <- grep(first_condition, colnames(df[df$Protein == protein, c(LOG2.names)]))
-  trat.colums <- grep(second_condition, colnames(df[df$Protein == protein, c(LOG2.names)]))
+  if (nrow(subset_data) == 0) {
+    stop(paste("Protein", protein, "not found in df$Protein"))
+  }
   
+  first_group <- unique(metadata$group)[unique(metadata$group) == selected_conditions[2]]
+  second_group <- unique(metadata$group)[unique(metadata$group) == selected_conditions[1]]
   
-  control <- rep(first_condition, length(cond.colums))
-  treatment <- rep(second_condition, length(trat.colums))
+  cond.colums <- intersect(colnames(subset_data), metadata %>%
+                             filter(group == first_group) %>%
+                             pull(log2_col))
   
+  trat.colums <- intersect(colnames(subset_data), metadata %>%
+                             filter(group == second_group) %>%
+                             pull(log2_col))
   
-  control_samples <- colnames(subset_data)[cond.colums]
-  treatment_samples <- colnames(subset_data)[trat.colums]
+  cond.colums <- as.character(cond.colums)
+  trat.colums <- as.character(trat.colums)
+
+  all_samples <- c(cond.colums, trat.colums)
   
-  # Combine control and treatment samples into a single vector
-  all_samples <- c(control_samples, treatment_samples)
-  
-  
-  
-  # Create a dataframe containing the values for Control and Treatment
   dt <- data.frame(
-    Condition = c(control, treatment),
-    val = c(as.vector(subset_data[cond.colums]), as.vector(subset_data[trat.colums])),
-    Samples = all_samples
+    Condition = rep(c(first_group, second_group),
+                    c(length(cond.colums), length(trat.colums))),
+    val = as.vector(unlist(subset_data[, all_samples])),
+    Samples = c(cond.colums, trat.colums)
   )
-  
-  
-  ggplot(dt, aes(Condition, val))+
-    theme_dose()+
+
+  p <- ggplot(dt, aes(Condition, val)) +
+    theme_dose() +
     geom_jitter(aes(color = factor(Samples)),
                 size = 5, position = position_dodge(width=0.4)) +
-    geom_boxplot()+
+    geom_boxplot() +
     labs(
       y = expression(log[2]~"Intensity"),
       col = "Samples") +
-    scale_color_brewer(palette = "Dark2")+
+    scale_color_brewer(palette = "Dark2") +
     facet_wrap(~{protein}) +
     theme(axis.title.x = element_blank())
   
+  print(p)
 }
+
+
 
 ##################################################################################
 #Functional analysis
@@ -1397,15 +1492,15 @@ Goterms_finder <- function(df, raw,  target, numeric_ns, mthreshold, filter_na, 
   #down <- subset(down, down$p.value <= 0.05)
   
   #Afianzamos la obtenci?n de los identificadores de nuestras prote?nas a ensemblegenome
-  if (platform == 2){
+  if (platform == 1 | platform == 2 | platform == 4){
     up_names <- gconvert(up$Protein, organism = organismo,  target, numeric_ns, mthreshold, filter_na)
     down_names <- gconvert(down$Protein, organism = organismo,  target, numeric_ns, mthreshold, filter_na)
     background <- gconvert(raw$Protein, organism = organismo,  target, numeric_ns, mthreshold, filter_na)
     
-  } else if (platform == 3 | platform == 4){
-    up_names <- gconvert(up$Protein_description, organism = organismo,  target, numeric_ns, mthreshold, filter_na)
-    down_names <- gconvert(down$Protein_description, organism = organismo,  target, numeric_ns, mthreshold, filter_na)
-    background <- gconvert(raw$Protein_description, organism = organismo,  target, numeric_ns, mthreshold, filter_na)
+  } else if (platform == 3){
+    up_names <- gconvert(up$Protein, organism = organismo,  target, numeric_ns, mthreshold, filter_na)
+    down_names <- gconvert(down$Protein, organism = organismo,  target, numeric_ns, mthreshold, filter_na)
+    background <- gconvert(raw$Protein, organism = organismo,  target, numeric_ns, mthreshold, filter_na)
   }
   #Multi enrichment analysis
   
