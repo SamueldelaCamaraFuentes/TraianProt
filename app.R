@@ -23,7 +23,12 @@ ui <- dashboardPage(
     
     #Home
     conditionalPanel(condition = "input.main_tabs == 'Home_introduction'",
-      sidebarMenu(menuItem('Home', icon=icon("home"), selected = TRUE, tabName = "home"))),
+      sidebarMenu(menuItem('Home', icon=icon("home"), selected = TRUE, tabName = "home",
+                           downloadButton("download_tutorial", 
+                                          label = "Download Tutorial", 
+                                          icon = icon("file-pdf"),
+                                          style="display: block; margin: 10px auto; width: 200px; color:black;")
+      ))),
     
     #Data handling
     conditionalPanel(condition = "input.main_tabs == 'data_handling'",
@@ -511,7 +516,7 @@ ui <- dashboardPage(
                   title = "Home",
                   div(
                     imageOutput("home_img", inline = TRUE),
-                    style = "text-align: center; margin-left: 5%;"  # Adjust the margin as needed
+                    style = "text-align: center; margin-left: 0%;"  # Adjust the margin as needed
                   ),
                   div(
                     style = "
@@ -692,6 +697,18 @@ server <- function(input, output) {
          height = 1000)
     
   }, deleteFile = F)
+  
+  
+  output$download_tutorial <- downloadHandler(
+    filename = function() {
+      "TraianProt_Tutorial.pdf"   # the name that will be downloaded
+    },
+    content = function(file) {
+      # copy the PDF from your app directory to the user
+      file.copy("tutorial.pdf", file)
+    },
+    contentType = "application/pdf"
+  )
   
   #Data handling
   #Several reactive variables in order to plot the quality metrics plots
