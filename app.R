@@ -153,6 +153,10 @@ ui <- dashboardPage(
                                                label = "Download Venn",
                                                icon = icon("download"),
                                                style="display: block; margin: 0 auto; width: 200px; color:black;")),
+                       menuItem("Unique Peptides Extractor", 
+                                icon = icon("external-link-alt"),
+                                href = "https://samueldelacamara.shinyapps.io/Unique_peptides_extractor/",
+                                newtab = TRUE),
                        
                        #downloadprotquant
                        
@@ -549,6 +553,13 @@ ui <- dashboardPage(
                 tabPanel(title = "Preprocessing",
                          value = "data_handling",
                          icon = icon("table"),
+                         
+                         box(
+                           title = "Note", width = 12, status = "warning", solidHeader = TRUE,
+                           helpText("💡 Tip: For FragPipe and Proteome Discoverer datasets, 
+                                      use the Unique Peptides Extractor (see sidebar) to pre-process 
+                                      your data before continuing.")
+                         ),
                          
                          column(width = 12, DT::dataTableOutput("file")),
                          fluidPage(
