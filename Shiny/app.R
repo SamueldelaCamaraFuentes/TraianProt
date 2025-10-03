@@ -23,7 +23,12 @@ ui <- dashboardPage(
     
     #Home
     conditionalPanel(condition = "input.main_tabs == 'Home_introduction'",
-      sidebarMenu(menuItem('Home', icon=icon("home"), selected = TRUE, tabName = "home"))),
+      sidebarMenu(menuItem('Home', icon=icon("home"), selected = TRUE, tabName = "home",
+                           downloadButton("download_tutorial", 
+                                          label = "Download Tutorial", 
+                                          icon = icon("file-pdf"),
+                                          style="display: block; margin: 10px auto; width: 200px; color:black;")
+      ))),
     
     #Data handling
     conditionalPanel(condition = "input.main_tabs == 'data_handling'",
@@ -148,6 +153,10 @@ ui <- dashboardPage(
                                                label = "Download Venn",
                                                icon = icon("download"),
                                                style="display: block; margin: 0 auto; width: 200px; color:black;")),
+                       menuItem("Unique Peptides Extractor", 
+                                icon = icon("external-link-alt"),
+                                href = "https://samueldelacamara.shinyapps.io/Unique_peptides_extractor/",
+                                newtab = TRUE),
                        
                        #downloadprotquant
                        
@@ -545,6 +554,13 @@ ui <- dashboardPage(
                          value = "data_handling",
                          icon = icon("table"),
                          
+                         box(
+                           title = "Note", width = 12, status = "warning", solidHeader = TRUE,
+                           helpText("💡 Tip: For FragPipe and Proteome Discoverer datasets, 
+                                      use the Unique Peptides Extractor (see sidebar) to pre-process 
+                                      your data before continuing.")
+                         ),
+                         
                          column(width = 12, DT::dataTableOutput("file")),
                          fluidPage(
                            fluidRow(
@@ -692,6 +708,18 @@ server <- function(input, output) {
          height = 1000)
     
   }, deleteFile = F)
+  
+  
+  output$download_tutorial <- downloadHandler(
+    filename = function() {
+      "TraianProt_Tutorial.pdf"   # the name that will be downloaded
+    },
+    content = function(file) {
+      # copy the PDF from your app directory to the user
+      file.copy("tutorial.pdf", file)
+    },
+    contentType = "application/pdf"
+  )
   
   #Data handling
   #Several reactive variables in order to plot the quality metrics plots
