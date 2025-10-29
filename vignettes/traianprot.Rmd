@@ -1,0 +1,134 @@
+---
+title: "TraianProt: A Shiny Application for Proteomics Data Analysis"
+output:
+  rmarkdown::html_vignette:
+    toc: true
+    toc_depth: 3
+vignette: >
+  %\VignetteIndexEntry{traianprot}
+  %\VignetteEngine{knitr::rmarkdown}
+  %\VignetteEncoding{UTF-8}
+---
+
+```{r, include = FALSE}
+knitr::opts_chunk$set(
+  collapse = TRUE,
+  comment = "#>"
+)
+```
+
+# 1. Introduction
+
+**TraianProt** is an interactive R/Shiny package designed to simplify the downstream analysis of wide-format proteomics data.  
+It provides a modular workflow for processing both **label-free** and **labeled** quantitative data obtained from **Data-Dependent Acquisition (DDA)** or **Data-Independent Acquisition (DIA)** mass spectrometry experiments.
+
+Supported input formats include output from tools such as **MaxQuant**, **MSFragger**, **DIA-NN**, **ProteoScape**, and **Proteome Discoverer**.
+
+
+
+## Key Features
+
+- 🔹 Intuitive user interface built on **Shiny**  
+- 🔹 Flexible data input compatible with common proteomics pipelines  
+- 🔹 Integrated normalization and filtering procedures  
+- 🔹 Robust differential analysis and visualization tools  
+- 🔹 Functional enrichment and **PPI network** exploration  
+
+> 💡 *This vignette provides a step-by-step walkthrough of the TraianProt workflow — from data import to biological interpretation.*
+
+
+
+# 2. Data Preparation
+
+Before starting, ensure your data file is formatted appropriately (e.g., protein groups table or peptide intensities).  
+Each column should correspond to a **sample** or **condition**, and rows should represent **proteins or peptides**.
+
+```{r}
+# Example: Reading example dataset
+example_data <- read.csv("example_proteins.csv", header = TRUE)
+head(example_data)
+```
+
+> ⚠️ *Tip: Missing values can occur frequently in proteomics data — TraianProt offers integrated imputation tools to handle these gracefully.*
+
+
+
+# 3. Using the Application
+
+Launch the Shiny interface by running:
+
+```{r}
+library(traianprot)
+traianprot()
+```
+
+Once launched, the main interface presents a **modular workflow**, allowing you to perform each analysis step sequentially.
+
+
+# 4. Core Modules Overview
+
+TraianProt provides a comprehensive suite of analytical modules:
+
+### 4.1 Data Filtering
+Filter proteins or peptides based on user-defined criteria such as detection frequency or intensity thresholds.
+
+### 4.2 Normalization
+Apply normalization procedures (e.g., log-transformation, median centering) to correct for technical bias across samples.
+
+### 4.3 Missing Value Imputation
+Automatically fill in missing values using common proteomics imputation methods.
+
+### 4.4 Statistical Analysis
+Perform robust statistical testing (e.g., t-tests, ANOVA, or linear models) to identify **differentially abundant proteins**.
+
+### 4.5 Functional Enrichment Analysis
+Integrate biological context using GO, KEGG, or Reactome enrichment methods.
+
+### 4.6 Protein-Protein Interaction Networks
+Visualize **PPI networks** to reveal functional relationships between identified proteins.
+
+# 5. Visualization
+
+TraianProt generates publication-quality visualizations such as:
+
+- Volcano plots for differential abundance  
+- PCA plots for sample clustering  
+- Heatmaps for expression patterns  
+- Barplots and dotplots for enrichment results  
+
+```{r, eval=FALSE}
+# Example: Visualization function call
+plot_volcano(results_table)
+```
+
+> 📊 *All plots can be exported in high resolution for inclusion in reports or publications.*
+
+
+
+# 6. Exporting Results
+
+All processed data, statistical results, and plots can be easily exported for downstream reporting.
+
+```{r, eval=FALSE}
+# Export results as CSV
+write.csv(results_table, "Differential_Proteins.csv", row.names = FALSE)
+```
+
+> 💾 *Outputs include normalized intensity tables, differential analysis results, and enriched term summaries.*
+
+
+# 7. Session Information
+
+For reproducibility, include session information:
+
+```{r}
+sessionInfo()
+```
+
+
+# 8. Summary
+
+**TraianProt** streamlines the analysis of proteomics datasets within an intuitive graphical interface.  
+From normalization to enrichment analysis, it supports a complete and reproducible workflow.
+
+> 🎯 *Whether you are a beginner or experienced researcher, TraianProt provides a fast and transparent way to extract biological insights from quantitative proteomics data.*

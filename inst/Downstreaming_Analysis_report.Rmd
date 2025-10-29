@@ -1,0 +1,125 @@
+---
+title: "TraianProt - Analysis report"
+date: "`r format(Sys.time(), '%d %B, %Y')`"
+params:
+  venn: NULL
+  proteins: NULL
+  boxplot: NULL
+  pca: NULL
+  imputation: NULL
+  corrplot: NULL
+  volcano: NULL
+  heatmap: NULL
+  dotplot: NULL
+  barplot: NULL
+  control_replicates: NA
+  treatment_replicates: NA
+  type_of_test: NA
+  log2FC_up: NA
+  log2FC_down: NA
+  pvalue: NA
+  organism: NA
+  p_value_for_enrichment: NA
+  taxon_id: NA
+  score_threshold: NA
+output:
+  html_document:
+    toc: true
+    toc_float: true
+    theme: united
+---
+
+<style>
+  body {font-family: sans-serif;}
+  h1, h2, h3 {color: #d9534f;}
+  .parameter-box {background-color: #f9f9f9; border: 1px solid #ddd; border-left: 5px solid #d9534f; padding: 15px; margin-bottom: 20px;}
+</style>
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = FALSE, message = FALSE, warning = FALSE, fig.align = 'center')
+library(grid) # Necesario para el diagrama de Venn
+```
+
+## Analysis details
+This report contains all the output plots from the downstream analysis process of the present proteomic dataset. In the present study a filtering step, a normalization step and an imputation step have been performed. Several display plots from this process are included in the present report. A differential analysis has been performed, volcano and heatmap plots are included in this report. Finally a functional analysis and interaction analysis is performed with its plots. 
+
+## Parameters used
+
+* Adjusted p value cutoff <= <span style="color:blue">`r params$p_value`</span>  
+* Log fold change cutoff up >= <span style="color:blue">`r params$log2FC_up`</span>
+* Log fold change cutoff down >= <span style="color:blue">`r params$log2FC_down`</span>
+
+## Results
+
+### Venn Diagram
+
+```{r echo=FALSE}
+
+# Los diagramas de Venn de la librería VennDiagram necesitan ser dibujados con grid.draw()
+if (!is.null(params$venn)) {
+  grid.draw(params$venn)
+} else {
+  "Gráfico no generado."
+}
+```
+
+### Identified Proteins
+
+```{r echo=FALSE}
+
+if (!is.null(params$proteins)) {
+  print(params$proteins)
+} else {
+  "Gráfico no generado."
+}
+```
+
+### Boxplot
+
+```{r echo=FALSE}
+
+if (!is.null(params$boxplot)) params$boxplot else "Gráfico no generado."
+```
+
+### Correlation
+
+```{r echo=FALSE}
+
+if (!is.null(params$corrplot)) params$corrplot else "Gráfico no generado."
+```
+
+### Principal Component Analysis
+
+```{r echo=FALSE}
+
+if (!is.null(params$pca)) params$pca else "Gráfico no generado."
+```
+
+### Volcano Plot
+
+```{r echo=FALSE}
+
+if (!is.null(params$volcano)) params$volcano else "Gráfico no generado."
+```
+
+### Heatmap
+
+```{r echo=FALSE}
+
+if (!is.null(params$volcano)) params$heatmap else "Gráfico no generado."
+```
+
+
+### Dot Plot de Enriquecimiento
+
+```{r echo=FALSE}
+
+if (!is.null(params$dotplot)) params$dotplot else "Gráfico no generado."
+```
+
+### Bar Plot de Enriquecimiento
+
+```{r echo=FALSE}
+
+if (!is.null(params$barplot)) params$barplot else "Gráfico no generado."
+```
