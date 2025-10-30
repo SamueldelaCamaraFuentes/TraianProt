@@ -1,4 +1,4 @@
-Package: traianprot
+Package: TraianProt
 Title: TraianProt: a user-friendly R shiny application for wide format
     proteomics data downstream analysis
 Version: 0.99.5

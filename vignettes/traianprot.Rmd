@@ -5,7 +5,7 @@ output:
     toc: true
     toc_depth: 3
 vignette: >
-  %\VignetteIndexEntry{traianprot}
+  %\VignetteIndexEntry{TraianProt}
   %\VignetteEngine{knitr::rmarkdown}
   %\VignetteEncoding{UTF-8}
 ---
@@ -58,8 +58,8 @@ head(example_data)
 Launch the Shiny interface by running:
 
 ```{r}
-library(traianprot)
-traianprot()
+library(TraianProt)
+TraianProt()
 ```
 
 Once launched, the main interface presents a **modular workflow**, allowing you to perform each analysis step sequentially.
