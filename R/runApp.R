@@ -16,11 +16,11 @@
 #'   runTraianProt()
 #' }
 runTraianProt <- function() {
-  appDir <- system.file(package = "traianprot", "app.R")
+  appDir <- system.file(package = "TraianProt", "app.R")
   if (appDir == "") {
     stop(
       "Could not find the app.R file. ",
-      "Try re-installing 'traianprot'."
+      "Try re-installing 'TraianProt'."
     )
   }
   shiny::runApp(appDir, display.mode = "normal")

@@ -12,6 +12,7 @@ if(!require(BiocManager)){install.packages("BiocManager")}
 library(BiocManager)
 if(!require(plotly)){install.packages("plotly")}
 library(plotly)
+library(TraianProt)
 options(repos = BiocManager::repositories())
 
 options(shiny.maxRequestSize = 30*1024^2)
