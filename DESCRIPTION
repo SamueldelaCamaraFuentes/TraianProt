@@ -3,7 +3,7 @@ Title: TraianProt: a user-friendly R package for wide format
     proteomics data downstream analysis
 Version: 0.99.5
 Authors@R: 
-    person("Samuel", "de la Camara Fuentes", , "sdelacam@ucm.es", role = c("aut", "cre"))
+    person("Samuel", "de la Camara Fuentes", , "sdelacam@ucm.es", role = c("aut", "cre"), comment = c(ORCID = "0000-0001-6718-5896"))
 Description: A proteomics data analysis platform that enables the analysis
     of both label-free and labeled data from Data-Dependent or
     Data-Independent Acquisition mass spectrometry mode, supporting
@@ -16,10 +16,10 @@ Description: A proteomics data analysis platform that enables the analysis
     correction, thereby enhancing the reliability of biological
     interpretations.
 License: GPL (>= 3)
-biocViews: Software, ShinyApps, Visualization, Proteomics, MassSpectrometry, DataImport, Normalization, DifferentialExpression
+biocViews: Software, Proteomics, MassSpectrometry, DataImport, Normalization, DifferentialExpression
 Encoding: UTF-8
 Roxygen: list(markdown = TRUE)
-RoxygenNote: 7.3.2
+RoxygenNote: 7.3.3
 URL: https://github.com/SamueldelaCamaraFuentes/TraianProt
 BugReports: https://github.com/SamueldelaCamaraFuentes/TraianProt/issues
 Imports: 
@@ -51,8 +51,11 @@ Imports:
     plotly,
     DOSE,
     enrichplot,
-    STRINGdb
+    STRINGdb,
+    Rtsne,
+    clusterProfiler
 Suggests: 
     knitr,
-    rmarkdown
+    rmarkdown,
+    testthat
 VignetteBuilder: knitr
