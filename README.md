@@ -39,7 +39,7 @@ install_github('SamueldelaCamaraFuentes/TraianProt')
 ```
 
 # Test dataset
-Test datasets discussed in the manuscript are available in `Data` folder
+Test datasets discussed in the manuscript are available in `inst/extdata` folder
 
 <br>
 
