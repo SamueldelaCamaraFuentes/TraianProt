@@ -1,0 +1,401 @@
+---
+title: "TraianProt: A Comprehensive package for Proteomics Data Analysis"
+output:
+  rmarkdown::html_vignette:
+    toc: true
+    toc_depth: 3
+vignette: >
+  %\VignetteIndexEntry{TraianProt}
+  %\VignetteEngine{knitr::rmarkdown}
+  %\VignetteEncoding{UTF-8}
+---
+
+```{r, include = FALSE}
+knitr::opts_chunk$set(
+  collapse = TRUE,
+  comment = "#>",
+  warning = FALSE,
+  message = FALSE,
+  fig.width = 10, 
+  fig.height = 10,
+  out.width = "100%"
+)
+```
+
+# 1. Introduction
+
+**TraianProt** is an interactive R/Shiny package designed to simplify the downstream analysis of wide-format proteomics data.  
+It provides a modular workflow for processing both **label-free** and **labeled** quantitative data obtained from **Data-Dependent Acquisition (DDA)** or **Data-Independent Acquisition (DIA)** mass spectrometry experiments.
+
+Supported input formats include output from tools such as **MaxQuant**, **MSFragger**, **DIA-NN**, **ProteoScape**, and **Proteome Discoverer**.
+
+
+
+## Key Features
+
+- 🔹 Flexible data input compatible with common proteomics pipelines
+- 🔹 Intuitive user interface built on its **Shiny** format  
+- 🔹 Unique peptide filtering procedures
+- 🔹 Robust differential analysis and visualization tools  
+- 🔹 Functional enrichment and **PPI network** exploration  
+
+> 💡 *This vignette provides a step-by-step walkthrough of  TraianProt  — from data import to biological interpretation.*
+
+
+
+# 2. Package Installation and loading
+
+```{r, eval=TRUE}
+#install.packages('devtools')
+
+#install_github('SamueldelaCamaraFuentes/TraianProt')
+
+library(TraianProt)
+library(dplyr)
+library(knitr)
+```
+
+
+# 3. Data input
+
+Before starting, ensure your data file is formatted appropriately (e.g., protein groups table and metadata table).  
+In protein groups table file, ach column should correspond to a **sample** , and rows should represent **proteins**.
+The following code chuncks include the example format for MaxQuant output data and the metadata format which is globally shared among all search engines supported along with several parameters required for the analysis. 
+
+```{r, eval=TRUE}
+# 1. Define file paths for example data included in the package
+file_path_raw <- system.file("extdata", "proteinGroups.txt.gz", package = "TraianProt")
+file_path_metadata <- system.file("extdata", "metadata_MaxQuant.tsv", package = "TraianProt")
+#file_path_report #In case we are using DIANN data for reporting where the report.tsv file is located. 
+output_directory <- tempdir() # Use a temporary directory for outputs in this vignette
+
+# 2. Define Experimental Parameters
+platform_id <- 1            # 1=MaxQuant, 2=MSFragger, 3=DIA-NN, 4=PD, 5=ProteoScape
+organism_id <- 1            # 1= Candida albicans model organism, 2= Other organism (e.g Homo sapiens/Mus musculus etc)
+selected_conditions <- c("WT_H2O2", "WT") # Condition id defined in group column from metadata file.
+conditions <- "Treatment vs Control" #Title for plots.
+id_target <- "ENSG"         # Gene ID type
+organismo <- "calbicans"    # Organism for annotation, more at https://biit.cs.ut.ee/gprofiler/page/organism-list
+threshold <- 0.05           # Significance threshold for enrichment analyis.
+font_size <- 12             # Term size for plots in the enrichment analysis.
+terms_number <- 12          # Number of terms for enrichment plots in  the enrichment analysis.
+psms <- TRUE                # Whether PSMs correction is applied in differential analysis.
+```
+
+
+The metadata structure is defined in the tutorial.pdf file which can be found at https://github.com/SamueldelaCamaraFuentes/TraianProt. In the following chunck some modifications are aggreagated depending on the platform (MaxQuant, FragPipe, DIANN...) in order to facilitate unique peptide filtering and ongoing processes. 
+
+```{r, eval=TRUE}
+metadata <- read.delim(file_path_metadata, header = TRUE, row.names = NULL, stringsAsFactors = FALSE)
+
+if (platform_id == 1 | platform_id == 2 | platform_id == 5){
+  
+  metadata <- metadata %>%
+    mutate(
+      raw_name = intensity_sample_name,
+      intensity_sample_name = raw_name,
+      log2_col = sub("Intensity", "LOG2", raw_name)
+    ) %>% 
+    mutate(
+      raw_name = intensity_sample_name,
+      unique_peptides_col = sub("Intensity", "Unique.peptides", raw_name)
+    )%>%
+    select(intensity_sample_name, group, sample_name, log2_col, unique_peptides_col) 
+} else if (platform_id == 3) {
+  metadata <- metadata %>%
+    mutate(
+      raw_name = basename(intensity_sample_name),
+      intensity_sample_name = raw_name,
+      log2_col = sub("\\.(d|raw)$", ".LOG2", raw_name, ignore.case = TRUE),
+      unique_peptides_col = paste0("Unique peptides ", sub("\\.(d|raw)$", "", raw_name, ignore.case = TRUE))
+      
+    ) %>%
+    select(intensity_sample_name, group, sample_name, log2_col, unique_peptides_col)
+  
+} else if (platform_id == 4){
+  
+  metadata <- metadata %>%
+    mutate(
+      raw_name = intensity_sample_name,
+      intensity_sample_name = raw_name,
+      log2_col = sub("Abundance:", "LOG2", raw_name)
+    ) %>% 
+    mutate(
+      raw_name = intensity_sample_name,
+      unique_peptides_col = sub("Abundance:", "Unique.peptides", raw_name)
+    )%>%
+    select(intensity_sample_name, group, sample_name, log2_col, unique_peptides_col) 
+  
+  
+}
+
+filtered_metadata <- metadata[metadata$group %in% selected_conditions, ]
+```
+
+
+
+# 3. Using the Software.
+
+In the following chunk, we load raw proteomics data, taking into account various considerations depending on the platform used (e.g. MaxQuant, Fragpipe or DIANN). Once the data has been loaded, the quick_filtering function helps to remove contaminants and decoys (if using MaxQuant) and converts all the intensity values from the samples in the experiment into numeric values. Furthermore, for DIANN data it extracts peptide information from the report.tsv file whose directory has been supplied in the "file_path_report" parameter. 
+
+```{r, eval=TRUE}
+if (platform_id == 1 | platform_id == 2 | platform_id == 5){
+  
+  raw <- read.delim(file_path_raw , sep = "\t", stringsAsFactors = FALSE, colClasses = "character") 
+  df<- quick_filtering(raw, platform_id, organism_id, filtered_metadata, selected_conditions)
+
+} else if (platform_id == 3){
+  
+  raw <- read.delim(file_path_raw, sep = "\t", stringsAsFactors = FALSE, colClasses = "character", check.names = FALSE) 
+  df<- quick_filtering(raw, platform_id, organism_id, filtered_metadata, selected_conditions, file_path_report) 
+  df <- as.data.frame(df)
+
+} else if (platform_id == 4){
+  
+  raw <- as.data.frame(readxl::read_xlsx(file_path_raw))
+  
+  df<- quick_filtering(raw, platform_id, organism_id, filtered_metadata, selected_conditions)
+
+}
+
+# LOG 2 Intensity
+
+LOG2.names <- obtain_LOG.names(df)
+
+```
+
+
+# 4. Downstreaming analysis steps
+
+TraianProt provides a comprehensive suite of analytical modules:
+
+### 4.1 Preprocessing
+
+The first step is to identify the unique proteins. These are defined as proteins that have only been identified and quantified in one of the conditions under study. These proteins are important and will be considered significant in later steps.
+
+```{r, eval = TRUE, out.width="100%"}
+
+#Unique Proteins
+unique_proteins <- obtain_unique_proteins(df, filtered_metadata, selected_conditions)
+unique_proteins_control <- as.data.frame(unique_proteins[1], check.names = FALSE)
+unique_proteins_treatment <- as.data.frame(unique_proteins[2], check.names = FALSE)
+```
+
+The next step is to filter the data frame by unique peptides. The user will select the proportion of samples required for a protein to be included in the analysis (the 'min_fraction' parameter). For example, proteins with one unique peptide in at least 50% of the samples in at least one of the two compared conditions will be kept for further analysis. The user can then filter for missing values; during log transformation, these will be assigned as 'NA' and considered invalid. 
+The normalisation step can be assessed using two functions: the 'median_centering' function normalises according to the median of the samples, while the 'normalization_func' function normalises using different methods, such as mean, median centring, trimMean and VSC. 
+
+Finally, the choice of imputation can be assessed. Users can choose to filter using the impute_data function, which performs imputation based on a normal distribution, or the "K Nearest Neighbors" function, which uses the KNN algorithm for imputation. Alternatively, they can choose not to impute at all.
+
+
+```{r, eval = TRUE, out.width="100%"}
+# 4. Preprocessing
+# ------------------------------------------------------------------------------
+
+# 4.1) UNIQUE PEPTIDES FILTERING
+
+df <- unique_peptides_filter(df, filtered_metadata, number = 1, min_fraction = 0.5)
+
+# 4.2) Quantification filtering
+
+df.F <- filter_valids(df, filtered_metadata, unique_proteins, min_prop = 0.5, at_least_one <- FALSE, labeltype = 1)
+
+
+# 4.3) Normalization
+
+df.F <- median_centering(df.F, LOG2.names)
+df.F <- normalization_func(df.F, LOG2.names, method = "mean") 
+
+
+# 4.4) Imputation
+
+df.FNI <- impute_KNN_data(as.data.frame(df.F), LOG2.names, k = 5)
+df.FNI <- impute_data(as.data.frame(df.F), LOG2.names)
+
+df.FNI <- df.F #No imputation preferred action by developers.
+
+
+total <- bind_rows(df.FNI, as.data.frame(unique_proteins[1], check.names = FALSE))
+total_dataset <- bind_rows(total, as.data.frame(unique_proteins[2], check.names = FALSE))
+
+
+```
+
+
+
+A Venn diagram showing where users can inspect the proteins that are common to each condition, as well as those that are unique to each condition.
+
+```{r, eval=FALSE}
+library(VennDiagram)
+venn_diagram_plot <- grid.draw(venn_diagram(df.F, unique_proteins, label1 = "Control", label2 = "KO", color1 = "blue", color2 = "maroon")) 
+plot(venn_diagram_plot)
+```
+
+Users can see how many proteins have been identified and quantified in their experiment.
+
+```{r, eval=TRUE}
+identify_proteins(df, filtered_metadata, platform_id, selected_conditions) 
+```
+
+### 4.2 Quality Control
+
+This module covers a group of plots that describe the nature of our data (distribution, dispersion, missing values proportion in our data) Inside this section we can highlight the following setions:
+• Distribution plots: include a boxplot and dispersion plot.
+• Imputation plots: include a representation of the amount of missing values in the data before imputation and overly of both imputed and non-imputed distribution in data.
+• Normality plots: covers a set of plots whose purpose is to the representation of data´s distribution, including histogram of proteins abundances and a Q-Q plot.
+• Dimension reduction plots: plot with Principal Component Analysis or t-SNE  in case t-SNE is displayed a perplexity parameter can be applied, taking as the maximum value N/2, being N the number of samples per condition.
+• Correlation plots: include a Scater plot and correlation plot.
+
+```{r, eval=TRUE}
+boxplot <- boxplot_function(df.FNI, filtered_metadata, selected_conditions)
+print(boxplot)
+```
+
+```{r, eval=TRUE}
+preimputation_state(df.F, filtered_metadata$log2_col)
+```
+
+
+```{r, eval=TRUE}
+corrplot_function(df.FNI[filtered_metadata$log2_col], display = "shade")
+```
+
+```{r, eval=TRUE}
+pca(df.FNI,filtered_metadata, selected_conditions)
+```
+```{r, eval=TRUE}
+tsne(df.FNI, filtered_metadata,  perplexity_num = 2, selected_conditions)
+```
+
+
+### 4.3 Statistical Analysis
+In the differential analysis module, users can perform statistical tests. Firstly, the statistical test required to analyse the data must be chosen. The 'Simple t-test approach' option (test = 1) performs two-sample t-tests on protein intensity data using the t-test function from base R, while the 'Limma approach' option (test = 2) uses the limma (v 3.64.3) R package to calculate significant differences between groups. Lastly, the 'Wilcoxon test' option (test = 3) is a non-parametric alternative that can be used to compare two independent groups of samples when the data is not normally distributed. If the 'Limma approach' is selected, a variance correction depending on the number of PSMs identified can be applied (PSMs = TRUE, previously defined), using the DEqMS (v1.26.0) R package.
+
+Furthermore, users can choose whether or not to include the unique proteins in the final dataset as significant proteins (way parameter). When the "way" parameter is set to "2", unique proteins are included in the final dataset. This results in the maximum log2FC value for proteins exclusively identified in the "Treatment" condition and the minimum log2FC value for proteins exclusively identified in the "Control" condition. It also results in the smallest p-value and adjusted p-value for proteins exclusively identified in the "Treatment" condition and the smallest p-value and adjusted p-value for proteins exclusively identified in the "Control" condition. This is done to keep track of unique proteins. Furthermore, the two-sample t-test can be specified as dependent or independent, and the paired parameter can be selected. Finally, the user can select the statistical cut-off value, which is established in the sig parameter, and the method for committing the p-value adjustment is specified in the adjval parameter. Furthermore, a Log2FC threshold can be assigned.
+
+
+```{r, eval = TRUE, out.width="100%"}
+limma_1 <- statistical_analysis(df.FNI, test =2 , paired = FALSE, filtered_metadata, logfc = 1, sig = 0.05, adjval = "fdr", statval = 1, unique_proteins, way = 2, psms = TRUE, platform_id, selected_conditions, diann_dir = if (platform_id == 3) file_path_report else NULL)
+
+limma <- limma_1[-6]
+limma <- merge(total_dataset, limma, by = "Protein", check.names = FALSE)
+
+if (psms == TRUE){
+  limma <- limma %>%
+    dplyr::select("Protein", "Protein_description", "logFC", "sca.P.Value", "sca.adj.pval", "expression", everything())
+} else if (psms == FALSE){
+  limma <- limma %>%
+    select("Protein", "Protein_description", "logFC", "p.value", "adj.P.Val", "expression", everything())
+}
+
+limma <- limma[order(limma$expression),]
+row.names(limma) <- limma$Protein
+
+#write.xlsx(limma, file = "AD_.xlsx", rowNames = FALSE)
+```
+Columns from differential analysis file:
+
+* **Protein**: Contains the protein identifier associated with each protein according to UniProt nomenclature, the same information as in column
+* **Protein_description**: Contains the protein identifier following the “Gene name” nomenclature.  
+* **Log2FC**: Ratio of change on a logarithmic scale (log2) of the comparison analyzed. 
+* **Sca.P.Value**: p-value from the application of a Student's t-test for independent samples. The annotation “sca” at the beginning implies that it is a p-value corrected for the number of peptides identified for each protein. This is an approximation that aims to control the inherent dependence between protein variation and the number of peptides used for quantification.  This column is used to determine the set of significant proteins. 
+* **Sca.adj.pval**: p-value adjusted for multiple comparisons. The annotation “sca” at the beginning implies that it is an adjusted p-value corrected for the number of peptides identified for each protein. This is an approximation that aims, once again, to control the inherent dependence between protein variation and the number of peptides used for quantification. 
+* **P.value**: p-value from the application of a Student's t-test for independent samples.
+* **Adj.P.Val**: adjusted p-value for comparison.
+* **Expression**: Indicates whether the protein exhibits an increase in relative abundance for the conditions studied (Up-regulated), a decrease in relative abundance for the conditions studied (Down-regulated), or no significant changes (Unchanged). 
+
+In case it is DIA data coming from DIANN:
+* **Sample name ending in .d**: Raw intensity values of the protein in each of the samples handled in the experiment.
+In case it is DDA data coming from FragPipe:
+* **Sample name ending in .Intensity**: Raw intensity values of the protein in each of the samples handled in the experiment.
+In case it is DIA data coming from MaxQuant:
+* **Intensity. followed by sample name**: Raw intensity values of the protein in each of the samples handled in the experiment.
+
+* **Sample name ending in .LOG2**: Protein intensity values, normalized and transformed to a logarithmic scale (log2). 
+* **Unique peptides + sample name**: Number of unique peptides identified in each of the samples.
+* **Peptides + sample name**: Number of peptides identified in each of the samples.
+* **Counts_condition1**: Quantifications of each protein in the control group.
+* **Counts_condition2**: Quantifications of each protein in the treatment group.
+* **Counts**: Quantifications of each protein in both groups.
+* **CV_Control**: Coefficient of variation of the samples belonging to the control group.
+* **CV_Treatment**: Coefficient of Variation of the samples belonging to the Treatment group.
+* **Cond1_exclusive**: Indicates whether the protein is expressed only in the control condition.
+* **Cond2_exclusive**: Indicates whether the protein is expressed only in the treatment condition.
+
+### 4.4 Differential Analysis plots module
+
+In this module 2 different types of plots are included; the first one is the volcano plot which enables the visualization of data within an experimental setup and how each comparison differs to another, users can specify the points size and the title. In addition, in this module two heatmaps are displayed, the first one displays the identified proteins and the second one those proteins that exhibited differential relative abundances, users can write the title for the plot. 
+
+```{r, eval=TRUE}
+volcano <- volcano_plot_tiff(limma, title = "Treatment vs Control" , label = 3, statval = 2, psms)
+print(volcano)
+```
+
+```{r, eval=FALSE}
+heatmap <- my_heatmap_differential(limma, df.FNI, filtered_metadata$log2_col, title = "Treatment vs Control")
+```
+
+### 4.5 Functional Analysis module
+
+The functional analysis module is focused on performing gene set enrichment analysis taking into consideration those proteins that exhibited significant changes in their relative abundance and it is performed using the gprofiler2 (v0.2.3) R package. For that purpose, users have to introduce the organism id, for example in case we are analyzing C. albicans derived mass spectrometry data, “calbicans” should be introduced (obtained from htps://biit.cs.ut.ee/gprofiler/page/organism-list) the type of Protein ID which serves as the nomenclature destination change for the protein ids (it is always ENSG as default), the enrichment threshold for the retrieval of functional terms and whether the whole list of identified proteins is used as the background (this option is recommended to set as “YES” as it is going to allow to obtain unbiased results).
+
+```{r, eval = TRUE, out.width="100%"}
+
+Go_terms <- Goterms_finder(limma, df, target = "ENSG", numeric_ns = "", mthreshold = Inf, filter_na = TRUE, organismo = "calbicans", custombg = FALSE, platform_id,  user_threshold = 0.05, multi_query = FALSE, evcodes = TRUE, sources = c("GO", "KEGG", "WP", "REAC"))
+
+#write.xlsx(Go_terms, file = "AF_.xlsx", rowNames = FALSE)
+
+```
+
+Columns from functional enrichment file:
+* **Cluster**: Category to which the term belongs (down-regulated or up-regulated). Same information as the “Conditions” column.
+* **Category**: database from which the term originates. 
+* **ID**: identifier of the term.
+* **Description**: description of the term.
+* **p.value**: p-value after correction for multiple testing. 
+* **adj.P.Val**: adjusted p-value after correction for multiple testing. 
+* **Query_size**: number of protein identifiers included in the search. 
+* **Count**: number of protein identifiers in the search that are annotated with the corresponding term. 
+* **Term_size**: total number of protein identifiers annotated with the term. 
+* **Effective_domain_size**: list of protein identifiers that map to the term. 
+* **geneID**: total number of protein identifiers used for the hypergeometric test.
+* **Gene Ratio**: number of protein identifiers in the query that are annotated with the corresponding term divided by the number of protein identifiers included in the query (Count/query_size). 
+* **Bg ratio**: total number of protein identifiers annotated in the term divided by the total number of protein identifiers used for the hypergeometric test (term_size/geneID).
+
+In the plot section, the user has the ability of customizing both a Dotplot and a Barplot, by adding the title name, the number of terms to display and the corresponding size of the font used. 
+
+```{r,  eval = TRUE, echo=FALSE, out.width="100%"}
+dotplot_func(Go_terms, x = "GeneRatio", title = conditions, split = "Conditions", font.size = 10, showCategory = 10, color = "adj.P.Val")
+
+barplot_func(Go_terms, 10, conditions = conditions, font.size = 10)
+
+```
+
+### 4.6 Protein-Protein Interaction module
+In the interaction analysis module, the user is allowed to perform a protein interaction analysis with the proteins that exhibited significant changes in their relative abundance using the STRINGdb (v2.20) R package. For that purpose, the user is required to introduce the STRING ID for the species along with a score threshold.
+
+
+```{r, echo=FALSE, out.width="100%"}
+
+interactions <- interactions_up(limma, taxonid = 237561, score = 400)
+
+interactions_down <- interactions_down(limma, taxonid = 237561, score = 400)
+
+
+graph_analysis <- igraph_analysis(interactions, taxonid = 237561, score = 400)
+```
+
+# 5. Session Information
+
+For reproducibility, include session information:
+
+```{r}
+sessionInfo()
+```
+
+
+# 6. Summary
+
+**TraianProt** streamlines the analysis of proteomics datasets within an intuitive graphical interface.  
+From normalization to enrichment analysis, it supports a complete and reproducible workflow.
+
+> 🎯 *Whether you are a beginner or experienced researcher, TraianProt provides a fast and transparent way to extract biological insights from quantitative proteomics data.*
