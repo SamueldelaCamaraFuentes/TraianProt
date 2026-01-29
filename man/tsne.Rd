@@ -25,22 +25,37 @@ A ggplot object.
 Generates a t-SNE plot for sample clustering using ggplot2.
 }
 \examples{
-  df <- data.frame(
-     Sample1 = c(10, 11, 12, 10),
-     Sample2 = c(10, 11, 12, 11),
-     Sample3 = c(20, 21, 22, 20),
-     Sample4 = c(20, 21, 22, 21)
-  )
-  row.names(df) <- c("P1", "P2", "P3", "P4")
+df <- data.frame(
+   # Group A (Low values)
+   Sample1 = c(10.1, 10.5, 12.0, 10.0),
+   Sample2 = c(10.2, 10.6, 12.1, 10.1),
+   Sample3 = c(10.3, 10.7, 12.2, 10.2),
+   Sample4 = c(10.4, 10.8, 12.3, 10.3),
+   Sample5 = c(10.5, 10.9, 12.4, 10.4),
+   # Group B (High values)
+   Sample6 = c(20.1, 21.5, 22.0, 20.0),
+   Sample7 = c(20.2, 21.6, 22.1, 20.1),
+   Sample8 = c(20.3, 21.7, 22.2, 20.2),
+   Sample9 = c(20.4, 21.8, 22.3, 20.3),
+   Sample10 = c(20.5, 21.9, 22.4, 20.4)
+)
+row.names(df) <- c("P1", "P2", "P3", "P4")
 
-  # 2. Metadata
-  metadata <- data.frame(
-     intensity_sample_name = c("Sample1", "Sample2", "Sample3", "Sample4"),
-     group = c("A", "A", "B", "B")
-  )
+metadata <- data.frame(
+   log2_col = paste0("Sample", 1:10),
+   group = c(rep("A", 5), rep("B", 5))
+)
+selected_conditions <- c("A", "B")
 
-  # IMPORTANT: For small datasets, perplexity must be low (usually < samples/3)
-  # We use perplexity = 1 for this tiny example.
-  tsne_plot(df, metadata, perplexity = 1)
+if (requireNamespace("Rtsne") && requireNamespace("ggplot2")) {
 
+   tsne_plot <- tsne(
+      x = df,
+      metadata = metadata,
+      perplexity_num = 2,
+      selected_conditions = selected_conditions
+   )
+
+   print(tsne_plot)
+}
 }

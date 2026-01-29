@@ -37,28 +37,35 @@ contaminants, reverse hits, and site-only identifications. It also parses
 protein identifiers from Fasta headers.
 }
 \examples{
+ raw_data <- data.frame(
+  Potential.contaminant = c("", "+", "", ""),
+  Reverse = c("", "", "+", ""),
+  Only.identified.by.site = c("", "", "", "+"),
 
-# Create synthetic raw data
-# Usamos paste0 para dividir las lineas largas y cumplir con CRAN/Bioc
-raw_data <- data.frame(
-  Potential.contaminant = c("", "+", ""),
-  Reverse = c("", "", ""),
-  Only.identified.by.site = c("", "", "+"),
   Fasta.headers = c(
-    paste0("orf19.4825 orf19.4825 CGDID:CAL0005336 ",
-           "COORDS:Ca21chr1_C_albicans_SC5314:2119345-2118881C"),
-    paste0("orf19.4925 orf19.4925 CGDID:CAL0005336 ",
-           "COORDS:Ca21chr1_C_albicans_SC5314:2119345-2118881C"),
-    paste0("orf19.4826 orf19.4826 CGDID:CAL0005336 ",
-           "COORDS:Ca21chr1_C_albicans_SC5314:2119345-2118881C")
+    ">sp|P04637|P53_HUMAN Cellular tumor antigen p53 OS=Homo sapiens",
+    ">sp|P00000|CONTAM_Protein Common contaminant",
+    ">sp|P12345|REV_Protein Reverse Sequence",
+    ">sp|P62258|1433E_HUMAN 14-3-3 protein epsilon"
   ),
-  Intensity.Sample1 = c(1,2,3),
+  # Intensity columns
+  Intensity.S1 = c(10000, 500, 200, 100),
+  Intensity.S2 = c(12000, 600, 150, 90),
   stringsAsFactors = FALSE
 )
 
-metadata <- data.frame(intensity_sample_name = "Intensity.Sample1")
+metadata <- data.frame(
+  intensity_sample_name = c("Intensity.S1", "Intensity.S2"),
+  sample_name = c("Sample_A", "Sample_B")
+)
 
-# Run filtering
-filtered_df <- quick_filtering(raw_data, 1, 1, metadata, NULL)
+filtered_df <- quick_filtering(
+   raw = raw_data,
+   platform = 1,
+   organism = 2,
+   metadata = metadata,
+   selected_conditions = NULL,
+   directory_path = NULL
+)
 
 }
