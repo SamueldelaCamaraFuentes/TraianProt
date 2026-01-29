@@ -1,7 +1,7 @@
 Package: TraianProt
 Title: TraianProt: a user-friendly R package for wide format
     proteomics data downstream analysis
-Version: 0.99.5
+Version: 0.99.6
 Authors@R: 
     person("Samuel", "de la Camara Fuentes", , "sdelacam@ucm.es", role = c("aut", "cre"), comment = c(ORCID = "0000-0001-6718-5896"))
 Description: A proteomics data analysis platform that enables the analysis

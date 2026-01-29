@@ -53,37 +53,48 @@ for up- and down-regulated proteins using gprofiler2.
 }
 \examples{
 
-# Create synthetic data
+\donttest{
 limma_df <- data.frame(
-  Protein = c("P04637", "P10415", "P00533"),
-  Protein_description = c("TP53", "CALCA", "EGFR"),
-  expression = c("Up-regulated", "Down-regulated", "Up-regulated"),
-  p.value = c(0.01, 0.02, 0.03)
+   Protein = c("P04637", "P00533", "P01116"),
+   Protein_description = c("TP53", "EGFR", "KRAS"),
+   expression = c("Up-regulated", "Up-regulated", "Up-regulated"),
+   p.value = c(0.001, 0.002, 0.003)
 )
+
+# raw_df is needed for the function structure, even if custombg=FALSE
 raw_df <- data.frame(
-  Protein = c("P04637", "P10415", "P00533", "P62258"),
-  Protein_description = c("TP53", "CALCA", "EGFR", "ACTB")
+   Protein = c("P04637", "P00533", "P01116", "P62258"),
+   Protein_description = c("TP53", "EGFR", "KRAS", "ACTB")
 )
 
-# This example requires an internet connection and will be skipped on tests
+# 2. Run the function with checks
+# This example requires an internet connection
 
-if (requireNamespace("gprofiler2")) {
-  go_res <- Goterms_finder(
-    df = limma_df,
-    raw = raw_df,
-    target = "ENSG",
-    numeric_ns = "ENTREZGENE_ACC",
-    mthreshold = 0.05,
-    filter_na = TRUE,
-    organismo = "hsapiens",
-    custombg = TRUE,
-    platform = 1
-  )
-  # Check the first result object
-  if (!is.null(go_res) && inherits(go_res[[1]], "compareClusterResult")) {
-    print(head(go_res[[1]]@compareClusterResult))
-  }
+if (requireNamespace("gprofiler2", quietly = TRUE)) {
+
+   try({
+     go_res <- Goterms_finder(
+       df = limma_df,
+       raw = raw_df,
+       target = "ENSG",
+       numeric_ns = "",
+       mthreshold = 0.05,
+       filter_na = TRUE,
+       organismo = "hsapiens",
+       custombg = FALSE,
+       platform = 1
+     )
+
+     # 3. Safe printing (checks if result exists before printing)
+     # We check if go_res exists, is a list, and has the expected slot
+     if (!is.null(go_res) &&
+         is.list(go_res) &&
+         length(go_res) >= 1 &&
+         inherits(go_res[[1]], "compareClusterResult")) {
+
+       print(head(go_res[[1]]@compareClusterResult))
+     }
+   }, silent = TRUE)
 }
-
-
+}
 }

@@ -19,7 +19,6 @@ Normalizes a numeric matrix of log-expression values by
 subtracting the median of each column.
 }
 \examples{
-\donttest{
 # Create a small, synthetic log-expression matrix
 log_df <- data.frame(
   Sample1 = c(10.0, 10.2, 9.8),
@@ -32,5 +31,4 @@ LOG2.names <- c("Sample1", "Sample2")
 normalized_df <- median_centering(log_df, LOG2.names)
 
 print(normalized_df)
-}
 }
