@@ -25,29 +25,36 @@
 #' @importFrom utils read.delim
 #'
 #' @examples
+#'  raw_data <- data.frame(
+#'   Potential.contaminant = c("", "+", "", ""),
+#'   Reverse = c("", "", "+", ""),
+#'   Only.identified.by.site = c("", "", "", "+"),
 #'
-#' # Create synthetic raw data
-#' # Usamos paste0 para dividir las lineas largas y cumplir con CRAN/Bioc
-#' raw_data <- data.frame(
-#'   Potential.contaminant = c("", "+", ""),
-#'   Reverse = c("", "", ""),
-#'   Only.identified.by.site = c("", "", "+"),
 #'   Fasta.headers = c(
-#'     paste0("orf19.4825 orf19.4825 CGDID:CAL0005336 ",
-#'            "COORDS:Ca21chr1_C_albicans_SC5314:2119345-2118881C"),
-#'     paste0("orf19.4925 orf19.4925 CGDID:CAL0005336 ",
-#'            "COORDS:Ca21chr1_C_albicans_SC5314:2119345-2118881C"),
-#'     paste0("orf19.4826 orf19.4826 CGDID:CAL0005336 ",
-#'            "COORDS:Ca21chr1_C_albicans_SC5314:2119345-2118881C")
+#'     ">sp|P04637|P53_HUMAN Cellular tumor antigen p53 OS=Homo sapiens",
+#'     ">sp|P00000|CONTAM_Protein Common contaminant",
+#'     ">sp|P12345|REV_Protein Reverse Sequence",
+#'     ">sp|P62258|1433E_HUMAN 14-3-3 protein epsilon"
 #'   ),
-#'   Intensity.Sample1 = c(1,2,3),
+#'   # Intensity columns
+#'   Intensity.S1 = c(10000, 500, 200, 100),
+#'   Intensity.S2 = c(12000, 600, 150, 90),
 #'   stringsAsFactors = FALSE
 #' )
 #'
-#' metadata <- data.frame(intensity_sample_name = "Intensity.Sample1")
+#' metadata <- data.frame(
+#'   intensity_sample_name = c("Intensity.S1", "Intensity.S2"),
+#'   sample_name = c("Sample_A", "Sample_B")
+#' )
 #'
-#' # Run filtering
-#' filtered_df <- quick_filtering(raw_data, 1, 1, metadata, NULL)
+#' filtered_df <- quick_filtering(
+#'    raw = raw_data,
+#'    platform = 1,
+#'    organism = 2,
+#'    metadata = metadata,
+#'    selected_conditions = NULL,
+#'    directory_path = NULL
+#' )
 #'
 
 quick_filtering <- function(raw, platform, organism, metadata, selected_conditions, directory_path = NULL){
@@ -859,7 +866,6 @@ unique_peptides_filter <- function(df, metadata, number, min_fraction) {
 #' @export
 #'
 #' @examples
-#' \donttest{
 #' # Create a small, synthetic log-expression matrix
 #' log_df <- data.frame(
 #'   Sample1 = c(10.0, 10.2, 9.8),
@@ -872,7 +878,6 @@ unique_peptides_filter <- function(df, metadata, number, min_fraction) {
 #' normalized_df <- median_centering(log_df, LOG2.names)
 #'
 #' print(normalized_df)
-#' }
 median_centering <- function(df, LOG2.names) {
 
   df[, LOG2.names] <- lapply(LOG2.names,
@@ -2088,9 +2093,9 @@ volcano_plot <- function(limma, title, label, statval, psms){
                               color = ~expression, colors = c("green3", "gray78", "firebrick3"),
                               size = I(label))
     }
-    plot <- plot %>% plotly::layout(title = title,
-                                    xaxis = list(title = list(text ='Log2 Fold Change')),
-                                    yaxis = list(title = list(text = 'Log10 p-value')))
+    plot <- plotly::layout(plot, title = title,
+                           xaxis = list(title = list(text ='Log2 Fold Change')),
+                           yaxis = list(title = list(text = 'Log10 p-value')))
 
     return(plot)
   } else if (statval == 2){
@@ -2109,15 +2114,16 @@ volcano_plot <- function(limma, title, label, statval, psms){
                               color = ~expression, colors = c("green3", "gray78", "firebrick3"),
                               size = I(label))
     }
-    plot <- plot %>% plotly::layout(title = title,
-                                    xaxis = list(title = list(text ='Log2 Fold Change')),
-                                    yaxis = list(title = list(text = 'Log10 q-value')))
+    plot <- plotly::layout(plot, title = title,
+                           xaxis = list(title = list(text ='Log2 Fold Change')),
+                           yaxis = list(title = list(text = 'Log10 p-value')))
 
     return(plot)
   }
-
 }
 
+
+#'
 #' Create a Static Volcano Plot for Publication
 #'
 #' This function generates a static volcano plot using the 'ggplot2' package,
@@ -2163,17 +2169,19 @@ volcano_plot <- function(limma, title, label, statval, psms){
 #' or "-log10 q-value" (for adjusted p-values).
 #'
 #' @examples
-#' # Create a mock data frame for demonstration
+#'
+#' mock_fc <- rnorm(100, 0, 2)
+#'
 #' limma_results <- data.frame(
-#'   logFC = rnorm(100, 0, 2),
-#'   log2FC = limma_results$logFC, # For compatibility
-#'   Protein = paste0("PROT", 1:100),
-#'   p.value = runif(100, 0, 1),
-#'   adj.P.Val = runif(100, 0, 1),
-#'   sca.P.Value = runif(100, 0, 1),
-#'   sca.adj.pval = runif(100, 0, 1),
-#'   expression = sample(c("Up-regulated", "Down-regulated", "Unchanged"),
-#'                       100, replace = TRUE)
+#'    logFC = mock_fc,
+#'    log2FC = mock_fc, # Use the vector we just created
+#'    Protein = paste0("PROT", 1:100),
+#'    p.value = runif(100, 0, 1),
+#'    adj.P.Val = runif(100, 0, 1),
+#'    sca.P.Value = runif(100, 0, 1),
+#'    sca.adj.pval = runif(100, 0, 1),
+#'    expression = sample(c("Up-regulated", "Down-regulated", "Unchanged"),
+#'                        100, replace = TRUE)
 #' )
 #'
 #' # Generate a static plot
@@ -2183,12 +2191,7 @@ volcano_plot <- function(limma, title, label, statval, psms){
 #'                                  statval = 2,
 #'                                  psms = TRUE)
 #'
-#' # You can then save it, e.g., with ggsave()
-#' # ggplot2::ggsave("my_volcano_plot.tiff", static_plot,
-#' #                 width = 7, height = 5, dpi = 300)
-#'
-#' @importFrom ggplot2 ggplot aes geom_point scale_color_manual guides
-#'   guide_legend ggtitle labs theme theme_light element_text element_line
+#' print(static_plot)
 #' @export
 volcano_plot_tiff <- function(limma, title, label,  statval, psms){
 
@@ -2385,26 +2388,40 @@ pca <- function(x, metadata, selected_conditions, pc_x = 1, pc_y = 2) {
 #' @importFrom Rtsne Rtsne
 #' @importFrom ggplot2 ggplot aes geom_point geom_text stat_ellipse labs
 #' @importFrom ggplot2 theme_minimal
-#'
 #' @examples
-#'   df <- data.frame(
-#'      Sample1 = c(10, 11, 12, 10),
-#'      Sample2 = c(10, 11, 12, 11),
-#'      Sample3 = c(20, 21, 22, 20),
-#'      Sample4 = c(20, 21, 22, 21)
-#'   )
-#'   row.names(df) <- c("P1", "P2", "P3", "P4")
+#' df <- data.frame(
+#'    # Group A (Low values)
+#'    Sample1 = c(10.1, 10.5, 12.0, 10.0),
+#'    Sample2 = c(10.2, 10.6, 12.1, 10.1),
+#'    Sample3 = c(10.3, 10.7, 12.2, 10.2),
+#'    Sample4 = c(10.4, 10.8, 12.3, 10.3),
+#'    Sample5 = c(10.5, 10.9, 12.4, 10.4),
+#'    # Group B (High values)
+#'    Sample6 = c(20.1, 21.5, 22.0, 20.0),
+#'    Sample7 = c(20.2, 21.6, 22.1, 20.1),
+#'    Sample8 = c(20.3, 21.7, 22.2, 20.2),
+#'    Sample9 = c(20.4, 21.8, 22.3, 20.3),
+#'    Sample10 = c(20.5, 21.9, 22.4, 20.4)
+#' )
+#' row.names(df) <- c("P1", "P2", "P3", "P4")
 #'
-#'   # 2. Metadata
-#'   metadata <- data.frame(
-#'      intensity_sample_name = c("Sample1", "Sample2", "Sample3", "Sample4"),
-#'      group = c("A", "A", "B", "B")
-#'   )
+#' metadata <- data.frame(
+#'    log2_col = paste0("Sample", 1:10),
+#'    group = c(rep("A", 5), rep("B", 5))
+#' )
+#' selected_conditions <- c("A", "B")
 #'
-#'   # IMPORTANT: For small datasets, perplexity must be low (usually < samples/3)
-#'   # We use perplexity = 1 for this tiny example.
-#'   tsne_plot(df, metadata, perplexity = 1)
+#' if (requireNamespace("Rtsne") && requireNamespace("ggplot2")) {
 #'
+#'    tsne_plot <- tsne(
+#'       x = df,
+#'       metadata = metadata,
+#'       perplexity_num = 2,
+#'       selected_conditions = selected_conditions
+#'    )
+#'
+#'    print(tsne_plot)
+#' }
 tsne <- function(x, metadata, perplexity_num, selected_conditions){
 
   first_group <- unique(metadata$group)[unique(metadata$group) == selected_conditions[2]]
@@ -2689,39 +2706,50 @@ Diferential_boxplot <- function(df, metadata, protein, LOG2.names, selected_cond
 #'
 #' @examples
 #'
-#' # Create synthetic data
+#' \donttest{
 #' limma_df <- data.frame(
-#'   Protein = c("P04637", "P10415", "P00533"),
-#'   Protein_description = c("TP53", "CALCA", "EGFR"),
-#'   expression = c("Up-regulated", "Down-regulated", "Up-regulated"),
-#'   p.value = c(0.01, 0.02, 0.03)
+#'    Protein = c("P04637", "P00533", "P01116"),
+#'    Protein_description = c("TP53", "EGFR", "KRAS"),
+#'    expression = c("Up-regulated", "Up-regulated", "Up-regulated"),
+#'    p.value = c(0.001, 0.002, 0.003)
 #' )
+#'
+#' # raw_df is needed for the function structure, even if custombg=FALSE
 #' raw_df <- data.frame(
-#'   Protein = c("P04637", "P10415", "P00533", "P62258"),
-#'   Protein_description = c("TP53", "CALCA", "EGFR", "ACTB")
+#'    Protein = c("P04637", "P00533", "P01116", "P62258"),
+#'    Protein_description = c("TP53", "EGFR", "KRAS", "ACTB")
 #' )
 #'
-#' # This example requires an internet connection and will be skipped on tests
+#' # 2. Run the function with checks
+#' # This example requires an internet connection
 #'
-#' if (requireNamespace("gprofiler2")) {
-#'   go_res <- Goterms_finder(
-#'     df = limma_df,
-#'     raw = raw_df,
-#'     target = "ENSG",
-#'     numeric_ns = "ENTREZGENE_ACC",
-#'     mthreshold = 0.05,
-#'     filter_na = TRUE,
-#'     organismo = "hsapiens",
-#'     custombg = TRUE,
-#'     platform = 1
-#'   )
-#'   # Check the first result object
-#'   if (!is.null(go_res) && inherits(go_res[[1]], "compareClusterResult")) {
-#'     print(head(go_res[[1]]@compareClusterResult))
-#'   }
+#' if (requireNamespace("gprofiler2", quietly = TRUE)) {
+#'
+#'    try({
+#'      go_res <- Goterms_finder(
+#'        df = limma_df,
+#'        raw = raw_df,
+#'        target = "ENSG",
+#'        numeric_ns = "",
+#'        mthreshold = 0.05,
+#'        filter_na = TRUE,
+#'        organismo = "hsapiens",
+#'        custombg = FALSE,
+#'        platform = 1
+#'      )
+#'
+#'      # 3. Safe printing (checks if result exists before printing)
+#'      # We check if go_res exists, is a list, and has the expected slot
+#'      if (!is.null(go_res) &&
+#'          is.list(go_res) &&
+#'          length(go_res) >= 1 &&
+#'          inherits(go_res[[1]], "compareClusterResult")) {
+#'
+#'        print(head(go_res[[1]]@compareClusterResult))
+#'      }
+#'    }, silent = TRUE)
 #' }
-#'
-#'
+#' }
 
 Goterms_finder <- function(df, raw,  target, numeric_ns, mthreshold, filter_na, organismo, custombg, platform, ...){
 

@@ -74,7 +74,7 @@
 #' @export
 #'
 #' @examples
-#' \donttest{
+#' \dontrun{
 #' # Example usage assuming files exist in the working directory
 #' run_traianprot(
 #'   file_path_raw = "data/proteinGroups.txt",
