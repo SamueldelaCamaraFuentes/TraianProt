@@ -509,7 +509,7 @@ venn_diagram <- function(df, unique_proteins, label1, label2, color1, color2){
   
   # Create sets for Venn diagram using Proteins
   x <- list(cond1_set$Protein, cond2_set$Protein)
-  names(x) <- c(label1, label2)
+  names(x) <- c(label2, label1)
   
   # Generate Venn diagram
   venn.plot <- VennDiagram::venn.diagram(
@@ -1604,28 +1604,49 @@ my_heatmap_differential <- function(limma, data, cond.names, title) {
   
   heatmap_data_long <- heatmap_data_long %>%
     dplyr::group_by(Protein) %>%
-    dplyr::mutate(Intensity_scaled = scale(Intensity)) %>% # scale is base R
+    dplyr::mutate(Intensity_scaled = scale(Intensity)) %>% 
     dplyr::ungroup()
+  num_prots <- length(unique(heatmap_data_long$Protein))
+  
+  if (num_prots > 100) {
+    line_size <- 0    
+    show_y_labels <- FALSE
+  } else {
+    line_size <- 0.1
+    show_y_labels <- TRUE
+    
+    y_font_size <- if(num_prots < 20) 10 else if(num_prots < 50) 7 else 5
+  }
   
   heatmap_object <- ggplot2::ggplot(heatmap_data_long, ggplot2::aes(x = Sample, y = Protein, fill = Intensity_scaled)) +
-    ggplot2::geom_tile(color = "white") + 
+    ggplot2::geom_tile(color = if(line_size > 0) "white" else NA, size = line_size) + 
     
     ggplot2::scale_fill_gradient2(
       low = "green", 
       mid = "black", 
       high = "red",
-      midpoint = 0, # Assumes scaled data is centered around 0
-      name = "Scaled Intensity"
+      midpoint = 0, 
+      name = "Fold-Change"
     ) +
-    ggplot2::labs(title = title, x = "Samples", y = "Proteins") +
-    ggplot2::theme_minimal() + # A clean theme for heatmaps
+    ggplot2::labs(
+      title = title, 
+      subtitle = paste("Total significant proteins, excluding abscense/precense:", num_prots), 
+      x = "Samples", 
+      y = if(show_y_labels) "Proteins" else "" 
+    ) +
+    ggplot2::theme_minimal() +
     ggplot2::theme(
       axis.text.x = ggplot2::element_text(angle = 45, vjust = 1, hjust = 1),
-      plot.title = ggplot2::element_text(hjust = 0.5, face = "bold")
+      plot.title = ggplot2::element_text(hjust = 0.5, face = "bold"),
+    
+      axis.text.y = if(show_y_labels) ggplot2::element_text(size = y_font_size) else ggplot2::element_blank(),
+      axis.ticks.y = if(show_y_labels) ggplot2::element_line() else ggplot2::element_blank(),
+      
+      panel.grid = ggplot2::element_blank()
     )
-  
   return(heatmap_object)
 }
+
 Diferential_boxplot <- function(df, metadata, protein, LOG2.names, selected_conditions){
   row.names(df) <- df$Protein
   

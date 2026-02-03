@@ -505,11 +505,6 @@ ui <- dashboardPage(
                                 downloadButton(outputId = "downloaddownnetwork",
                                                label = "Download",
                                                icon = icon("download"),
-                                               style="display: block; margin: 0 auto; width: 200px; color:black;"),
-                                h5("Report download"),
-                                downloadButton(outputId = "downloadreport",
-                                               label = "Report",
-                                               icon = icon("download"),
                                                style="display: block; margin: 0 auto; width: 200px; color:black;"))
                      ))
   ),
@@ -546,6 +541,34 @@ ui <- dashboardPage(
                       style = "color: #34495e; font-size: 16px;"
                     )
                   ),
+                  
+                  br(), hr(),
+                  
+                  h3("Try it out!", style = "text-align: center;"),
+                  p("Don't have data handy? Download our sample datasets.", style = "text-align: center;"),
+                  
+                  fluidRow(
+                    column(width = 12, offset = 3,
+                           box(
+                             title = "Example Data for Testing", 
+                             status = "danger",      
+                             solidHeader = TRUE, 
+                             width = 6, 
+                             "Download these files and upload them in the 'File Input' tab.",
+                             br(), br(),
+                             
+                             #MaxQuant example data 
+                             downloadButton("dl_example_matrix", "Download ProteinGroups Example (MaxQuant)", 
+                                            style = "color: #fff; background-color: #d9534f; border-color: #d43f3a; width: 100%;"), 
+                             br(), br(),
+                             
+                             #Metadata
+                             downloadButton("dl_example_metadata", "Download Metadata Example (MaxQuant)",
+                                            style = "color: #fff; background-color: #d9534f; border-color: #d43f3a; width: 100%;")
+                           )
+                    )
+                  ),
+                  
                   value = "Home_introduction",
                   icon = icon("home")
                 ),
@@ -705,6 +728,26 @@ ui <- dashboardPage(
                              column(width = 6, DT::dataTableOutput("downgraph")))
                            
                          )
+                ),
+                
+                tabPanel(
+                  title = "Report",
+                  icon = icon("file-alt"), 
+                  value = "report_tab", 
+                  
+                  div(
+                    style = "text-align: center; margin-top: 50px;",
+                    
+                    h1(icon("clipboard-check"), style = "color: #d9534f; font-size: 80px;"), 
+                    
+                    h2("Analysis Complete!"),
+                    p("Generate a comprehensive HTML report containing all relevant plots, statistical results, and parameters used in this session.", 
+                      style = "font-size: 18px; color: #555;"),
+                    br(),
+                    
+                    downloadButton("downloadreport", "Download Full Analysis Report", 
+                                   style = "color: #fff; background-color: #d9534f; border-color: #d43f3a; font-size: 20px; padding: 15px 30px;")
+                  )
                 )
     )
   ))
@@ -721,17 +764,38 @@ server <- function(input, output) {
     
   }, deleteFile = F)
   
+  #Download Tutorial
   output$download_tutorial <- downloadHandler(
     filename = function() {
       "TraianProt_Tutorial.pdf"   # the name that will be downloaded
     },
     content = function(file) {
       # copy the PDF from your app directory to the user
-      file.copy("tutorial.pdf", file)
+      file.copy("www/tutorial.pdf", file)
     },
     contentType = "application/pdf"
   )
   
+  #Download proteinGroups data example
+  output$dl_example_matrix <- downloadHandler(
+    filename = function() {
+      "ProteinGroups.txt" 
+    },
+    content = function(file) {
+      # Busca el archivo en la carpeta 'www'
+      file.copy("www/proteinGroups.txt", file)
+    }
+  )
+  
+  #Download MaxQuant metadata example
+  output$dl_example_metadata <- downloadHandler(
+    filename = function() {
+      "metadata_MaxQuant.tsv"
+    },
+    content = function(file) {
+      file.copy("www/metadata_MaxQuant.tsv", file)
+    }
+  )
   
   #Data handling
   #Several reactive variables in order to plot the quality metrics plots
@@ -1702,5 +1766,4 @@ server <- function(input, output) {
 
 shinyApp(ui, server)
 
-shinyApp(ui, server)
 
