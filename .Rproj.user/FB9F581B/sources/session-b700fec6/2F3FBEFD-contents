@@ -1,0 +1,79 @@
+library(TraianProt)
+
+# A. Comprobar que existe la función "Caja Negra"
+?run_traianprot  
+# (Debería abrirse la ayuda a la derecha)
+
+# B. Comprobar que existen las funciones sueltas "Toolbox"
+?quick_filtering
+?normalization_func
+
+
+
+
+raw_data <- data.frame(
+  Potential.contaminant = c("", "+", ""),
+   Reverse = c("", "", ""),
+   Only.identified.by.site = c("", "", "+"),
+   Fasta.headers = c(
+     paste0("orf19.4825 orf19.4825 CGDID:CAL0005336 ",
+            "COORDS:Ca21chr1_C_albicans_SC5314:2119345-2118881C"),
+     paste0("orf19.4925 orf19.4925 CGDID:CAL0005336 ",
+            "COORDS:Ca21chr1_C_albicans_SC5314:2119345-2118881C"),
+     paste0("orf19.4826 orf19.4826 CGDID:CAL0005336 ",
+            "COORDS:Ca21chr1_C_albicans_SC5314:2119345-2118881C")
+   ),
+   Intensity.Sample1 = c(1,2,3),
+   stringsAsFactors = FALSE
+ )
+
+metadata <- data.frame(intensity_sample_name = "Intensity.Sample1")
+
+filtered_df <- quick_filtering(raw_data, 1, 1, metadata, NULL)
+
+Aquí tienes el código limpio, sin las almohadillas de Roxygen (#'), listo para copiar y pegar en tu consola de R para probarlo directamente:
+  R
+  
+  # 1. Create synthetic raw data (MaxQuant style)
+  # We simulate 4 rows: 1 valid, 1 contaminant, 1 reverse, 1 identified only by site
+  raw_data <- data.frame(
+    Potential.contaminant = c("", "+", "", ""),
+    Reverse = c("", "", "+", ""),
+    Only.identified.by.site = c("", "", "", "+"),
+    # Standard UniProt headers expected by MaxQuant
+    Fasta.headers = c(
+      ">sp|P04637|P53_HUMAN Cellular tumor antigen p53 OS=Homo sapiens",
+      ">sp|P00000|CONTAM_Protein Common contaminant",
+      ">sp|P12345|REV_Protein Reverse Sequence",
+      ">sp|P62258|1433E_HUMAN 14-3-3 protein epsilon"
+    ),
+    # Intensity columns
+    Intensity.S1 = c(10000, 500, 200, 100),
+    Intensity.S2 = c(12000, 600, 150, 90),
+    stringsAsFactors = FALSE
+  )
+  
+  # 2. Create metadata mapping
+  metadata <- data.frame(
+    intensity_sample_name = c("Intensity.S1", "Intensity.S2"),
+    sample_name = c("Sample_A", "Sample_B")
+  )
+
+  filtered_df <- quick_filtering(
+    raw = raw_data,
+    platform = 1,
+    organism = 2,
+    metadata = metadata,
+    selected_conditions = NULL,
+    directory_path = NULL
+  )
+  
+  # 4. Check results
+  # Only the first row (TP53) should remain
+  if (nrow(filtered_df) == 1 && filtered_df$Protein[1] == "P04637") {
+    print("Filtering successful: Contaminants and decoys removed.")
+    print(head(filtered_df))
+  } else {
+    print("Something went wrong with the filtering.")
+  }  
+  

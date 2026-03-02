@@ -1,0 +1,30 @@
+# DESCRIPTION file
+
+# To add your package title
+# This is the correct function
+# 1. Set all text fields in ONE command
+# 1. Consolidated command to set/overwrite all fields
+usethis::use_description(fields = list(
+  Title = "TraianProt: a user-friendly R shiny application for wide format proteomics data downstream analysis",
+  Description = "A proteomics data analysis platform that enables the analysis of both label-free and labeled data from Data-Dependent or Data-Independent Acquisition mass spectrometry mode, supporting MaxQuant, MSFragger, DIA-NN, ProteoScape, and Proteome Discoverer output formats. TraianProt provides a comprehensive suite of stepwise downstream analysis modules, which includes data filtering, normalization procedures, and missing value imputation strategies. The platform also incorporates robust statistical frameworks for differential expression testing, with peptide-spectrum match level correction, thereby enhancing the reliability of biological interpretations.",
+  biocViews = "Software, ShinyApp, Visualization, Proteomics, MassSpectrometry, DataImport, Normalization, MissingValueImputation, DifferentialExpression",
+  Maintainer = "Samuel de la Camara Fuentes <sdelacam@ucm.es>",
+
+  # --- This is the fix ---
+  # Add this line to overwrite the placeholder author.
+  # Note the backticks and the single quotes.
+  `Authors@R` = 'person("Samuel", "de la Camara Fuentes", role = c("aut", "cre"), email = "sdelacam@ucm.es")'
+))
+
+# 2. Sets the License (this is fine)
+usethis::use_gpl3_license()
+
+# 3. Add dependencies (this is also fine)
+usethis::use_package("shiny")
+usethis::use_package("ggplot2")
+usethis::use_package("DT")
+usethis::use_package("SummarizedExperiment")
+usethis::use_package("dplyr")
+
+#For the version:
+desc::desc_set_version("0.99.5")

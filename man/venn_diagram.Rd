@@ -4,7 +4,7 @@
 \alias{venn_diagram}
 \title{Create a Venn Diagram}
 \usage{
-venn_diagram(df, unique_proteins, label1, label2, color1, color2)
+venn_diagram(df, unique_proteins, color1, color2)
 }
 \arguments{
 \item{df}{A data frame of common proteins (must have a "Protein" column).}
@@ -13,13 +13,13 @@ venn_diagram(df, unique_proteins, label1, label2, color1, color2)
 1. Proteins unique to the first set.
 2. Proteins unique to the second set.}
 
-\item{label1}{Label for the first set (e.g., "Control").}
-
-\item{label2}{Label for the second set (e.g., "Treatment").}
-
 \item{color1}{Color for the first set.}
 
 \item{color2}{Color for the second set.}
+
+\item{label1}{Label for the first set (e.g., "Control").}
+
+\item{label2}{Label for the second set (e.g., "Treatment").}
 }
 \value{
 A gList object (a plot) representing the Venn diagram.

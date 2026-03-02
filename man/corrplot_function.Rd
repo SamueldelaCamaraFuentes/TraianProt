@@ -6,6 +6,7 @@
 \usage{
 corrplot_function(
   df,
+  metadata,
   display = "circle",
   tl.col = "black",
   addCoef.col = "black"
