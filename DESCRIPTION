@@ -1,0 +1,68 @@
+Package: TraianProt
+Title: TraianProt: a user-friendly R package for wide format
+    proteomics data downstream analysis
+Version: 0.99.75
+Authors@R: 
+    person("Samuel", "de la Camara Fuentes", , "sdelacam@ucm.es", role = c("aut", "cre"), comment = c(ORCID = "0000-0001-6718-5896"))
+Description: A proteomics data analysis platform that enables the analysis
+    of both label-free and labeled data from Data-Dependent or
+    Data-Independent Acquisition mass spectrometry mode, supporting
+    MaxQuant, MSFragger, DIA-NN, ProteoScape, and Proteome Discoverer
+    output formats. TraianProt provides a comprehensive suite of stepwise
+    downstream analysis modules, which includes data filtering,
+    normalization procedures, and missing value imputation strategies. The
+    platform also incorporates robust statistical frameworks for
+    differential expression testing, with peptide-spectrum match level
+    correction, thereby enhancing the reliability of biological
+    interpretations.
+License: GPL (>= 3)
+biocViews: Software, Proteomics, MassSpectrometry, DataImport, Normalization, DifferentialExpression
+Encoding: UTF-8
+Roxygen: list(markdown = TRUE)
+RoxygenNote: 7.3.3
+URL: https://github.com/SamueldelaCamaraFuentes/TraianProt
+BugReports: https://github.com/SamueldelaCamaraFuentes/TraianProt/issues
+Imports: 
+    dplyr,
+    ggplot2,
+    ggrepel,
+    ggExtra,
+    VennDiagram,
+    pheatmap,
+    VIM,
+    wrProteo,
+    wrMisc,
+    gplots,
+    gprofiler2,
+    writexl,
+    readxl,
+    data.table,
+    igraph,
+    stringr,
+    limma,
+    methods,
+    grDevices,
+    graphics,
+    stats,
+    matrixStats,
+    tidyr,
+    tibble,
+    DEqMS,
+    plotly,
+    DOSE,
+    enrichplot,
+    STRINGdb,
+    Rtsne,
+    shiny,
+    shinyWidgets,
+    shinydashboard,
+    shinyjs,
+    DT,
+    rmarkdown,
+    clusterProfiler
+Suggests: 
+    knitr,
+    BiocStyle,
+    rmarkdown,
+    testthat
+VignetteBuilder: knitr
