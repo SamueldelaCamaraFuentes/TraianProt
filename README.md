@@ -50,7 +50,7 @@ if (!require("devtools")) {
 And install the development version
 
 ```r
-devtools::install_github("DrQuestion/carmon")
+devtools::install_github('SamueldelaCamaraFuentes/TraianProt')
 ```
 
 # Test dataset
