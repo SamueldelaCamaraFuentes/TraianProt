@@ -25,22 +25,15 @@ Generates a Venn diagram plot object from a list of unique
 proteins and a data frame of common proteins.
 }
 \examples{
-# --- Create 100\% Synthetic Data ---
-# 1. Create a data frame of proteins common to both groups
 common_proteins <- data.frame(
     Protein = c("ProteinA", "ProteinB", "ProteinC")
 )
 
-# 2. Create a list of data frames for unique proteins
 unique_protein_list <- list(
-    # Proteins unique to Group 1 ("Control")
-    data.frame(Protein = c("ProteinD", "ProteinE")),
-    # Proteins unique to Group 2 ("Treatment")
-    data.frame(Protein = c("ProteinF", "ProteinG", "ProteinH", "ProteinI"))
+    Control = data.frame(Protein = c("ProteinD", "ProteinE")),
+    Treatment = data.frame(Protein = c("ProteinF", "ProteinG", "ProteinH", "ProteinI"))
 )
 
-# --- Run the Example ---
-# This code is now self-contained and runnable by BiocCheck
 my_venn_plot <- venn_diagram(
     df = common_proteins,
     unique_proteins = unique_protein_list,
@@ -48,7 +41,6 @@ my_venn_plot <- venn_diagram(
     color2 = "red"
 )
 
-# Venn diagrams often need to be explicitly drawn
 grid::grid.newpage()
 grid::grid.draw(my_venn_plot)
 

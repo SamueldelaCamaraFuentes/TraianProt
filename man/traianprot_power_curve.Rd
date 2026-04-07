@@ -42,6 +42,6 @@ data <- data.frame(
     ID = letters[1:10],
     R1 = rnorm(10), R2 = rnorm(10), R3 = rnorm(10)
 )
-plot <- traianprot_power_curve(data, c("R1", "R2", "R3"), foldchange = 2)
+plot <- traianprot_power_curve(data, c("R1", "R2", "R3"), foldchange = 2, replicatespower = 5, alpha_level_choice = 1, alpha_level = 0.05)
 print(plot)
 }

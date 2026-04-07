@@ -15,7 +15,7 @@ It provides a user-friendly graphical interface to run the proteomics
 downstreaming analysis workflow.
 }
 \examples{
-\donttest{
+\dontrun{
 
 runTraianProt()
 }

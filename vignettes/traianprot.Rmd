@@ -53,8 +53,9 @@ Supported input formats include output from tools such as **MaxQuant**, **MSFrag
 # 2. Package Installation and loading
 
 ```{r, eval=FALSE}
-if (!requireNamespace("BiocManager", quietly = TRUE))
+if (!requireNamespace("BiocManager", quietly = TRUE)) {
     install.packages("BiocManager")
+}
 
 BiocManager::install("TraianProt")
 ```
@@ -77,7 +78,7 @@ The primary and most user-friendly way to interact with TraianProt is through it
 To start the graphical interface, simply run the following command in your R console:
 
 ```{r, eval=TRUE}
-#runTraianProt()
+# runTraianProt()
 ```
 
 ### 3.2 Required Inputs
@@ -111,7 +112,7 @@ The following code chuncks include the example format for MaxQuant output data a
 
 ```{r, eval=TRUE}
 # 1. Define file paths for example data included in the package
-file_path_raw <- system.file("extdata", "proteinGroups.txt.gz", package = "TraianProt")
+file_path_raw <- system.file("extdata", "proteinGroups.txt", package = "TraianProt")
 file_path_metadata <- system.file("extdata", "metadata_MaxQuant.tsv", package = "TraianProt")
 # file_path_report #In case we are using DIANN data for reporting where the report.tsv file is located.
 output_directory <- tempdir() # Use a temporary directory for outputs in this vignette
@@ -237,7 +238,7 @@ df.F <- normalization_func(df.F, LOG2.names, method = "mean")
 
 # 5.4) Imputation
 
-#df.FNI <- impute_KNN_data(as.data.frame(df.F), LOG2.names, k = 5)
+# df.FNI <- impute_KNN_data(as.data.frame(df.F), LOG2.names, k = 5)
 df.FNI <- impute_data(as.data.frame(df.F), LOG2.names)
 
 df.FNI <- df.F # No imputation preferred action by developers.

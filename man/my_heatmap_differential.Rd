@@ -28,7 +28,8 @@ Creates a ggplot2 heatmap of differentially expressed proteins.
 # Create synthetic data
 limma_results <- data.frame(
     Protein = c("Prot1", "Prot2", "Prot3"),
-    expression = c("Up-regulated", "Not Significant", "Down-regulated")
+    expression = c("Up-regulated", "Not Significant", "Down-regulated"),
+    logFC = c(2.5, 0.5, -2.1)
 )
 data_expr <- data.frame(
     Protein = c("Prot1", "Prot2", "Prot3"),

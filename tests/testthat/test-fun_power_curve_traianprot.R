@@ -22,6 +22,6 @@ test_that("traianprot_power_curve catches non-numeric input errors", {
             alpha_level_choice = 1,
             alpha_level = 0.05
         ),
-        "Las columnas seleccionadas en 'log2_cols' deben ser numéricas."
+        "Las columnas seleccionadas en 'log2_cols' deben ser numericas."
     )
 })

@@ -6,8 +6,18 @@
 \usage{
 traian_to_SE(df.F, total_dataset, metadata, df_limma)
 }
+\arguments{
+\item{df.F}{dataframe from preprocessing methdos.}
+
+\item{total_dataset}{whole dataframe including abscence and presence proteins}
+
+\item{metadata}{metadata that defines the experiment}
+
+\item{df_limma}{dataframe containing statistical results}
+}
 \value{
-A \code{SummarizedExperiment} object containing the raw and normalized intensity matrices (assays), sample information (colData), and differential expression statistics (rowData).
+a Bioconductor-standard SummarizedExperiment object,
+containing the raw, normalized and statistical resutls.
 }
 \description{
 Compiles the raw, normalized, and statistical results from

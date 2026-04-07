@@ -40,5 +40,5 @@ test_that("my_heatmap_differential handles DE proteins and empty results", {
 
     expect_s3_class(res_empty, "ggplot")
 
-    expect_equal(nrow(res_empty$data), 0)
+    expect_s3_class(res_empty$data, "waiver")
 })
