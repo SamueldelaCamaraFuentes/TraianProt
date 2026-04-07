@@ -27,13 +27,13 @@ Creates a ggplot2 heatmap of differentially expressed proteins.
 \examples{
 # Create synthetic data
 limma_results <- data.frame(
-  Protein = c("Prot1", "Prot2", "Prot3"),
-  expression = c("Up-regulated", "Not Significant", "Down-regulated")
+    Protein = c("Prot1", "Prot2", "Prot3"),
+    expression = c("Up-regulated", "Not Significant", "Down-regulated")
 )
 data_expr <- data.frame(
-  Protein = c("Prot1", "Prot2", "Prot3"),
-  Sample1 = c(12, 10, 8),
-  Sample2 = c(13, 10, 7)
+    Protein = c("Prot1", "Prot2", "Prot3"),
+    Sample1 = c(12, 10, 8),
+    Sample2 = c(13, 10, 7)
 )
 sample_names <- c("Sample1", "Sample2")
 

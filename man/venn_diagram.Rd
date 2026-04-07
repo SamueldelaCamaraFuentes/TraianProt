@@ -4,7 +4,7 @@
 \alias{venn_diagram}
 \title{Create a Venn Diagram}
 \usage{
-venn_diagram(df, unique_proteins, label1, label2, color1, color2)
+venn_diagram(df, unique_proteins, color1, color2)
 }
 \arguments{
 \item{df}{A data frame of common proteins (must have a "Protein" column).}
@@ -12,10 +12,6 @@ venn_diagram(df, unique_proteins, label1, label2, color1, color2)
 \item{unique_proteins}{A list containing two data frames:
 1. Proteins unique to the first set.
 2. Proteins unique to the second set.}
-
-\item{label1}{Label for the first set (e.g., "Control").}
-
-\item{label2}{Label for the second set (e.g., "Treatment").}
 
 \item{color1}{Color for the first set.}
 
@@ -32,26 +28,24 @@ proteins and a data frame of common proteins.
 # --- Create 100\% Synthetic Data ---
 # 1. Create a data frame of proteins common to both groups
 common_proteins <- data.frame(
-  Protein = c("ProteinA", "ProteinB", "ProteinC")
+    Protein = c("ProteinA", "ProteinB", "ProteinC")
 )
 
 # 2. Create a list of data frames for unique proteins
 unique_protein_list <- list(
-  # Proteins unique to Group 1 ("Control")
-  data.frame(Protein = c("ProteinD", "ProteinE")),
-  # Proteins unique to Group 2 ("Treatment")
-  data.frame(Protein = c("ProteinF", "ProteinG", "ProteinH", "ProteinI"))
+    # Proteins unique to Group 1 ("Control")
+    data.frame(Protein = c("ProteinD", "ProteinE")),
+    # Proteins unique to Group 2 ("Treatment")
+    data.frame(Protein = c("ProteinF", "ProteinG", "ProteinH", "ProteinI"))
 )
 
 # --- Run the Example ---
 # This code is now self-contained and runnable by BiocCheck
 my_venn_plot <- venn_diagram(
-  df = common_proteins,
-  unique_proteins = unique_protein_list,
-  label1 = "Control",
-  label2 = "Treatment",
-  color1 = "blue",
-  color2 = "red"
+    df = common_proteins,
+    unique_proteins = unique_protein_list,
+    color1 = "blue",
+    color2 = "red"
 )
 
 # Venn diagrams often need to be explicitly drawn

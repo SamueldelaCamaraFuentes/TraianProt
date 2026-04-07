@@ -24,9 +24,9 @@ Creates a heatmap using the base R \code{heatmap} function.
 \examples{
 # Create synthetic data
 heat_data <- data.frame(
-  Protein = paste0("Prot", 1:5),
-  Sample1 = rnorm(5, 10),
-  Sample2 = rnorm(5, 12)
+    Protein = paste0("Prot", 1:5),
+    Sample1 = rnorm(5, 10),
+    Sample2 = rnorm(5, 12)
 )
 sample_names <- c("Sample1", "Sample2")
 

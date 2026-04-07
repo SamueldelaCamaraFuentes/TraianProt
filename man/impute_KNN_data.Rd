@@ -23,18 +23,21 @@ values in a log-expression matrix.
 \examples{
 \donttest{
 log_matrix_na <- matrix(
-  c(10.0, 10.2, NA,   10.5, 10.1, 9.9,   # Sample 1 (with NAs)
-    12.0, NA,   11.9, 12.1, 11.8, NA),   # Sample 2 (with NAs)
-  nrow = 6, ncol = 2,
-  dimnames = list(
-    c("P1", "P2", "P3", "P4", "P5", "P6"),
-    c("Sample1", "Sample2")
-  )
+    c(
+        10.0, 10.2, NA, 10.5, 10.1, 9.9, # Sample 1 (with NAs)
+        12.0, NA, 11.9, 12.1, 11.8, NA
+    ), # Sample 2 (with NAs)
+    nrow = 6, ncol = 2,
+    dimnames = list(
+        c("P1", "P2", "P3", "P4", "P5", "P6"),
+        c("Sample1", "Sample2")
+    )
 )
 
 LOG2.names <- c("Sample1", "Sample2")
 
 imputed_matrix <- impute_KNN_data(as.data.frame(log_matrix_na), LOG2.names)
-print(imputed_matrix)
 }
+print(imputed_matrix)
+
 }

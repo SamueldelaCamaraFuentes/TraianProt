@@ -38,16 +38,16 @@ remove proteins with low confidence. It keeps a protein if, for
 \examples{
 # Create synthetic data
 peptide_df <- data.frame(
-  Pep.C1 = c(2, 0, 1, 5),
-  Pep.C2 = c(3, 1, 0, 6),
-  Pep.T1 = c(0, 2, 1, 0),
-  Pep.T2 = c(0, 3, 0, 0)
+    Pep.C1 = c(2, 0, 1, 5),
+    Pep.C2 = c(3, 1, 0, 6),
+    Pep.T1 = c(0, 2, 1, 0),
+    Pep.T2 = c(0, 3, 0, 0)
 )
 rownames(peptide_df) <- c("ProtA", "ProtB", "ProtC", "ProtD")
 
 meta <- data.frame(
-  unique_peptides_col = c("Pep.C1", "Pep.C2", "Pep.T1", "Pep.T2"),
-  group = c("Control", "Control", "Treatment", "Treatment")
+    unique_peptides_col = c("Pep.C1", "Pep.C2", "Pep.T1", "Pep.T2"),
+    group = c("Control", "Control", "Treatment", "Treatment")
 )
 
 # Filter: require min 1 peptide in at least 75\% of reps (i.e., 2/2)
@@ -57,10 +57,10 @@ meta <- data.frame(
 # ProtD: Passes in Control (2/2 have >= 1). Kept.
 
 filtered_df <- unique_peptides_filter(
-  df = peptide_df,
-  metadata = meta,
-  number = 1,
-  min_fraction = 0.75
+    df = peptide_df,
+    metadata = meta,
+    number = 1,
+    min_fraction = 0.75
 )
 
 print("Filtered proteins (should be A, B, D):")

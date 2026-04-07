@@ -31,13 +31,13 @@ principal components using base R plotting.
 \examples{
 # Create synthetic data
 x_data <- data.frame(
-  LOG2.C1 = rnorm(10, 8), LOG2.C2 = rnorm(10, 8),
-  LOG2.T1 = rnorm(10, 9), LOG2.T2 = rnorm(10, 9),
-  row.names = paste0("Prot", 1:10)
+    LOG2.C1 = rnorm(10, 8), LOG2.C2 = rnorm(10, 8),
+    LOG2.T1 = rnorm(10, 9), LOG2.T2 = rnorm(10, 9),
+    row.names = paste0("Prot", 1:10)
 )
 metadata <- data.frame(
-  log2_col = c("LOG2.C1", "LOG2.C2", "LOG2.T1", "LOG2.T2"),
-  group = c("Control", "Control", "Treatment", "Treatment")
+    log2_col = c("LOG2.C1", "LOG2.C2", "LOG2.T1", "LOG2.T2"),
+    group = c("Control", "Control", "Treatment", "Treatment")
 )
 selected_cond <- c("Treatment", "Control") # Matches user's logic [2] then [1]
 

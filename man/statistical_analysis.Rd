@@ -93,45 +93,44 @@ The function uses several non-standard variable assignment methods
 # 1. Create a mock data frame (df)
 set.seed(123)
 df_data <- data.frame(
-  Protein = paste0("Prot", 1:5),
-  Protein_description = paste("Description for", paste0("Prot", 1:5)),
-  Cond1_R1 = rnorm(5, 10, 1),
-  Cond1_R2 = rnorm(5, 10, 1),
-  Cond2_R1 = rnorm(5, 12, 1), # Cond2 is higher
-  Cond2_R2 = rnorm(5, 12, 1)
+    Protein = paste0("Prot", 1:5),
+    Protein_description = paste("Description for", paste0("Prot", 1:5)),
+    Cond1_R1 = rnorm(5, 10, 1),
+    Cond1_R2 = rnorm(5, 10, 1),
+    Cond2_R1 = rnorm(5, 12, 1), # Cond2 is higher
+    Cond2_R2 = rnorm(5, 12, 1)
 )
 rownames(df_data) <- df_data$Protein
 
 # 2. Create mock metadata
 meta <- data.frame(
-  log2_col = c("Cond1_R1", "Cond1_R2", "Cond2_R1", "Cond2_R2"),
-  group = c("Condition1", "Condition1", "Condition2", "Condition2")
+    log2_col = c("Cond1_R1", "Cond1_R2", "Cond2_R1", "Cond2_R2"),
+    group = c("Condition1", "Condition1", "Condition2", "Condition2")
 )
 
 # 3. Define unique proteins (for way = 2)
 uniques_list <- list(
-  data.frame(Protein = "Prot_Control", Protein_description = "Only in Control"),
-  data.frame(Protein = "Prot_Treat", Protein_description = "Only in Treatment")
+    data.frame(Protein = "Prot_Control", Protein_description = "Only in Control"),
+    data.frame(Protein = "Prot_Treat", Protein_description = "Only in Treatment")
 )
 
 # Run analysis (t-test, unpaired, no PSMs, include uniques)
 results <- statistical_analysis(
-  df = df_data,
-  test = 1, # t-test
-  paired = FALSE,
-  metadata = meta,
-  logfc = 1,
-  sig = 0.05,
-  adjval = "BH",
-  statval = 2, # Use adjusted p-value
-  unique_proteins = uniques_list,
-  way = 2, # Include uniques
-  psms = FALSE,
-  platform = 1,
-  selected_conditions = c("Condition2", "Condition1") # Treat 2 vs 1
+    df = df_data,
+    test = 1, # t-test
+    paired = FALSE,
+    metadata = meta,
+    logfc = 1,
+    sig = 0.05,
+    adjval = "BH",
+    statval = 2, # Use adjusted p-value
+    unique_proteins = uniques_list,
+    way = 2, # Include uniques
+    psms = FALSE,
+    platform = 1,
+    selected_conditions = c("Condition2", "Condition1") # Treat 2 vs 1
 )
 
 print(results)
-
 
 }

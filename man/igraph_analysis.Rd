@@ -28,20 +28,20 @@ protein networks.
 \examples{
 \donttest{
 if (requireNamespace("STRINGdb") && requireNamespace("igraph")) {
-  # Create synthetic data
-  up_mapped <- data.frame(
-    Protein = c("TP53", "EGFR"),
-    STRING_id = c("9606.ENSP00000269305", "9606.ENSP00000275493")
-  )
-  down_mapped <- data.frame(
-    Protein = c("CALCA", "ACTB"),
-    STRING_id = c("9606.ENSP00000302220", "9606.ENSP00000482455")
-  )
-  interactions_list <- list(up_mapped, down_mapped)
+    # Create synthetic data
+    up_mapped <- data.frame(
+        Protein = c("TP53", "EGFR"),
+        STRING_id = c("9606.ENSP00000269305", "9606.ENSP00000275493")
+    )
+    down_mapped <- data.frame(
+        Protein = c("CALCA", "ACTB"),
+        STRING_id = c("9606.ENSP00000302220", "9606.ENSP00000482455")
+    )
+    interactions_list <- list(up_mapped, down_mapped)
 
-  # Run analysis
-  analysis_results <- igraph_analysis(interactions_list, 9606, 400)
-  print(analysis_results$Upregulated)
+    # Run analysis
+    analysis_results <- igraph_analysis(interactions_list, 9606, 400)
+    print(analysis_results$Upregulated)
 }
 }
 

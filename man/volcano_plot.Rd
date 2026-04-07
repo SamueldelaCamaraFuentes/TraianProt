@@ -57,21 +57,25 @@ the \code{expression} column.
 \examples{
 # Create a mock data frame for demonstration
 limma_results <- data.frame(
-  logFC = rnorm(100, 0, 2),
-  Protein = paste0("PROT", 1:100),
-  p.value = runif(100, 0, 1),
-  adj.P.Val = runif(100, 0, 1),
-  sca.P.Value = runif(100, 0, 1),
-  sca.adj.pval = runif(100, 0, 1),
-  expression = sample(c("Up-regulated", "Down-regulated", "Unchanged"),
-                      100, replace = TRUE)
+    logFC = rnorm(100, 0, 2),
+    Protein = paste0("PROT", 1:100),
+    p.value = runif(100, 0, 1),
+    adj.P.Val = runif(100, 0, 1),
+    sca.P.Value = runif(100, 0, 1),
+    sca.adj.pval = runif(100, 0, 1),
+    expression = sample(c("Up-regulated", "Down-regulated", "Unchanged"),
+        100,
+        replace = TRUE
+    )
 )
 
 # Generate an interactive plot using adjusted p-values without PSM weighting
-volcano_plot(limma = limma_results,
-             title = "Interactive Volcano Plot",
-             label = 5,
-             statval = 2,
-             psms = FALSE)
+volcano_plot(
+    limma = limma_results,
+    title = "Interactive Volcano Plot",
+    label = 5,
+    statval = 2,
+    psms = FALSE
+)
 
 }

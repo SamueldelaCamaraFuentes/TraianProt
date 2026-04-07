@@ -40,29 +40,29 @@ A helper function to filter a protein expression data frame
 \examples{
 
 raw_df <- data.frame(
-  Protein = c("P1", "P2", "P3", "P4"),
-  LOG2_A1 = c(20, 21, NA, 22),
-  LOG2_A2 = c(20, NA, NA, 22),
-  LOG2_B1 = c(25, 24, 23, NA),
-  LOG2_B2 = c(25, 24, 23, 26)
+    Protein = c("P1", "P2", "P3", "P4"),
+    LOG2_A1 = c(20, 21, NA, 22),
+    LOG2_A2 = c(20, NA, NA, 22),
+    LOG2_B1 = c(25, 24, 23, NA),
+    LOG2_B2 = c(25, 24, 23, 26)
 )
 meta_df <- data.frame(
-  intensity_sample_name = c("A1", "A2", "B1", "B2"),
-  group = c("Control", "Control", "Treatment", "Treatment"),
-  log2_col = c("LOG2_A1", "LOG2_A2", "LOG2_B1", "LOG2_B2")
+    intensity_sample_name = c("A1", "A2", "B1", "B2"),
+    group = c("Control", "Control", "Treatment", "Treatment"),
+    log2_col = c("LOG2_A1", "LOG2_A2", "LOG2_B1", "LOG2_B2")
 )
 unique_list <- list(
-  data.frame(Protein = character()),
-  data.frame(Protein = character())
+    data.frame(Protein = character()),
+    data.frame(Protein = character())
 )
 
 filtered_data <- filter_valids(
-  df = raw_df,
-  metadata = meta_df,
-  unique_proteins = unique_list,
-  min_prop = 0.5,
-  at_least_one = FALSE,
-  labeltype = 1
+    df = raw_df,
+    metadata = meta_df,
+    unique_proteins = unique_list,
+    min_prop = 0.5,
+    at_least_one = FALSE,
+    labeltype = 1
 )
 
 head(filtered_data)

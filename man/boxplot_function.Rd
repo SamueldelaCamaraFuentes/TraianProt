@@ -25,15 +25,15 @@ by sample and colored by condition.
 \examples{
 # Create synthetic data
 log_df <- data.frame(
-  LOG2.C1 = rnorm(20, 10),
-  LOG2.C2 = rnorm(20, 10.1),
-  LOG2.T1 = rnorm(20, 12),
-  LOG2.T2 = rnorm(20, 12.1)
+    LOG2.C1 = rnorm(20, 10),
+    LOG2.C2 = rnorm(20, 10.1),
+    LOG2.T1 = rnorm(20, 12),
+    LOG2.T2 = rnorm(20, 12.1)
 )
 
 meta <- data.frame(
-  group = c("Control", "Control", "Treatment", "Treatment"),
-  log2_col = c("LOG2.C1", "LOG2.C2", "LOG2.T1", "LOG2.T2")
+    group = c("Control", "Control", "Treatment", "Treatment"),
+    log2_col = c("LOG2.C1", "LOG2.C2", "LOG2.T1", "LOG2.T2")
 )
 
 # Generate the boxplot

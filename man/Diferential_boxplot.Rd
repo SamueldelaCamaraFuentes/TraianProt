@@ -32,20 +32,20 @@ comparing two conditions.
 \examples{
 # Create synthetic data
 df_box <- data.frame(
-  Protein = "Prot1",
-  LOG2.C1 = rnorm(1, 8), LOG2.C2 = rnorm(1, 8),
-  LOG2.T1 = rnorm(1, 9), LOG2.T2 = rnorm(1, 9)
+    Protein = "Prot1",
+    LOG2.C1 = rnorm(1, 8), LOG2.C2 = rnorm(1, 8),
+    LOG2.T1 = rnorm(1, 9), LOG2.T2 = rnorm(1, 9)
 )
 metadata_box <- data.frame(
-  log2_col = c("LOG2.C1", "LOG2.C2", "LOG2.T1", "LOG2.T2"),
-  group = c("Control", "Control", "Treatment", "Treatment")
+    log2_col = c("LOG2.C1", "LOG2.C2", "LOG2.T1", "LOG2.T2"),
+    group = c("Control", "Control", "Treatment", "Treatment")
 )
 log_names <- c("LOG2.C1", "LOG2.C2", "LOG2.T1", "LOG2.T2")
 selected_cond <- c("Treatment", "Control")
 
 # Generate the plot
 if (requireNamespace("DOSE")) {
-  Diferential_boxplot(df_box, metadata_box, "Prot1", log_names, selected_cond)
+    Diferential_boxplot(df_box, metadata_box, "Prot1", log_names, selected_cond)
 }
 
 }

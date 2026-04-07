@@ -27,9 +27,9 @@ the \code{wrMisc} package to the specified LOG2 intensity columns.
 \examples{
 # Create synthetic LOG2 data
 log_df <- data.frame(
-  Protein = c("ProtA", "ProtB"),
-  LOG2.Sample1 = c(10, 12),
-  LOG2.Sample2 = c(11, 13)
+    Protein = c("ProtA", "ProtB"),
+    LOG2.Sample1 = c(10, 12),
+    LOG2.Sample2 = c(11, 13)
 )
 
 # Specify which columns to normalize

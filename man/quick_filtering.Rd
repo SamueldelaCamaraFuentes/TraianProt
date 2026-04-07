@@ -37,35 +37,34 @@ contaminants, reverse hits, and site-only identifications. It also parses
 protein identifiers from Fasta headers.
 }
 \examples{
- raw_data <- data.frame(
-  Potential.contaminant = c("", "+", "", ""),
-  Reverse = c("", "", "+", ""),
-  Only.identified.by.site = c("", "", "", "+"),
-
-  Fasta.headers = c(
-    ">sp|P04637|P53_HUMAN Cellular tumor antigen p53 OS=Homo sapiens",
-    ">sp|P00000|CONTAM_Protein Common contaminant",
-    ">sp|P12345|REV_Protein Reverse Sequence",
-    ">sp|P62258|1433E_HUMAN 14-3-3 protein epsilon"
-  ),
-  # Intensity columns
-  Intensity.S1 = c(10000, 500, 200, 100),
-  Intensity.S2 = c(12000, 600, 150, 90),
-  stringsAsFactors = FALSE
+raw_data <- data.frame(
+    Potential.contaminant = c("", "+", "", ""),
+    Reverse = c("", "", "+", ""),
+    Only.identified.by.site = c("", "", "", "+"),
+    Fasta.headers = c(
+        ">sp|P04637|P53_HUMAN Cellular tumor antigen p53 OS=Homo sapiens",
+        ">sp|P00000|CONTAM_Protein Common contaminant",
+        ">sp|P12345|REV_Protein Reverse Sequence",
+        ">sp|P62258|1433E_HUMAN 14-3-3 protein epsilon"
+    ),
+    # Intensity columns
+    Intensity.S1 = c(10000, 500, 200, 100),
+    Intensity.S2 = c(12000, 600, 150, 90),
+    stringsAsFactors = FALSE
 )
 
 metadata <- data.frame(
-  intensity_sample_name = c("Intensity.S1", "Intensity.S2"),
-  sample_name = c("Sample_A", "Sample_B")
+    intensity_sample_name = c("Intensity.S1", "Intensity.S2"),
+    sample_name = c("Sample_A", "Sample_B")
 )
 
 filtered_df <- quick_filtering(
-   raw = raw_data,
-   platform = 1,
-   organism = 2,
-   metadata = metadata,
-   selected_conditions = NULL,
-   directory_path = NULL
+    raw = raw_data,
+    platform = 1,
+    organism = 2,
+    metadata = metadata,
+    selected_conditions = NULL,
+    directory_path = NULL
 )
 
 }

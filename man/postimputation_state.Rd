@@ -28,20 +28,20 @@ imputation to visualize the effect of the imputation.
 
 # 1. Create synthetic data
 data_filt <- data.frame(
-  Protein = c("A", "B", "C", "D"),
-  LOG2.S1 = c(10, 12, NA, 8),
-  LOG2.S2 = c(11, 13, 9, NA),
-  KEEP = c(TRUE, TRUE, TRUE, TRUE) # For impute_data
+    Protein = c("A", "B", "C", "D"),
+    LOG2.S1 = c(10, 12, NA, 8),
+    LOG2.S2 = c(11, 13, 9, NA),
+    KEEP = c(TRUE, TRUE, TRUE, TRUE) # For impute_data
 )
 
 # 2. Create minimal versions of the imputation functions for the example
 impute_KNN_data <- function(df, lnames, k) {
-   df[lnames][is.na(df[lnames])] <- mean(unlist(df[lnames]), na.rm = TRUE)
-   return(df)
+    df[lnames][is.na(df[lnames])] <- mean(unlist(df[lnames]), na.rm = TRUE)
+    return(df)
 }
 impute_data <- function(df, lnames) {
-   df[lnames][is.na(df[lnames])] <- rnorm(sum(is.na(df[lnames])), mean = 7, sd = 0.3)
-   return(df)
+    df[lnames][is.na(df[lnames])] <- rnorm(sum(is.na(df[lnames])), mean = 7, sd = 0.3)
+    return(df)
 }
 
 # 3. Run the plot function

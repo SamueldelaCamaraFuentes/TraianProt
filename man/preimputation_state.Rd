@@ -22,13 +22,12 @@ package to visualize patterns of missing data.
 \examples{
 # Create synthetic data with NAs
 log_df <- data.frame(
-  LOG2.C1 = c(10, 10.1, NA, 9.9),
-  LOG2.C2 = c(11, NA, NA, 11.2),
-  LOG2.T1 = c(12, 12.1, 12.2, 12.3)
+    LOG2.C1 = c(10, 10.1, NA, 9.9),
+    LOG2.C2 = c(11, NA, NA, 11.2),
+    LOG2.T1 = c(12, 12.1, 12.2, 12.3)
 )
 
 # Plot the missingness pattern
 preimputation_state(log_df, c("LOG2.C1", "LOG2.C2", "LOG2.T1"))
-
 
 }

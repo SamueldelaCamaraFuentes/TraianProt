@@ -35,19 +35,19 @@ one condition while being completely absent (non-finite) in the other.
 \examples{
 # Create synthetic data with infinite values (representing missing)
 df_prot <- data.frame(
-  Protein = paste0("Prot", 1:4),
-  LOG2.C1 = c(10, 12, Inf, 9),
-  LOG2.C2 = c(11, 13, Inf, 10),
-  LOG2.T1 = c(Inf, Inf, 8, 11),
-  LOG2.T2 = c(Inf, Inf, 7, 12)
+    Protein = paste0("Prot", 1:4),
+    LOG2.C1 = c(10, 12, Inf, 9),
+    LOG2.C2 = c(11, 13, Inf, 10),
+    LOG2.T1 = c(Inf, Inf, 8, 11),
+    LOG2.T2 = c(Inf, Inf, 7, 12)
 )
 # Prot1/2 are present in Control, absent in Treatment
 # Prot3 is present in Treatment, absent in Control
 # Prot4 is present in both
 
 metadata <- data.frame(
-  log2_col = c("LOG2.C1", "LOG2.C2", "LOG2.T1", "LOG2.T2"),
-  group = c("Control", "Control", "Treatment", "Treatment")
+    log2_col = c("LOG2.C1", "LOG2.C2", "LOG2.T1", "LOG2.T2"),
+    group = c("Control", "Control", "Treatment", "Treatment")
 )
 # Note: T is [1] (second_group), C is [2] (first_group)
 selected_cond <- c("Treatment", "Control")

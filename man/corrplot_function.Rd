@@ -6,6 +6,7 @@
 \usage{
 corrplot_function(
   df,
+  metadata,
   display = "circle",
   tl.col = "black",
   addCoef.col = "black"
@@ -14,6 +15,9 @@ corrplot_function(
 \arguments{
 \item{df}{A data frame. The columns for which correlations are desired should
 be numeric. Non-numeric columns will be ignored by \code{cor()}.}
+
+\item{metadata}{A metadata data frame. Must contain 'group' and
+'log2_col' columns to map samples to groups.}
 
 \item{display}{A string specifying the visual representation (e.g., "circle").
 \strong{Note:} This parameter is currently not implemented in the function body,
@@ -42,17 +46,21 @@ The plot uses \code{scale_fill_gradient2} to create a divergent color scale
 (Red -> White -> Blue) centered at 0. \code{coord_fixed()} ensures square tiles.
 }
 \examples{
-# Create a sample data frame
 df_sample <- data.frame(
-  A = rnorm(20),
-  B = rnorm(20),
-  C = rnorm(20)
+    LOG2.C1 = rnorm(20, mean = 10),
+    LOG2.C2 = rnorm(20, mean = 10),
+    LOG2.T1 = rnorm(20, mean = 12),
+    LOG2.T2 = rnorm(20, mean = 12)
 )
 
-# Generate the plot
-p <- corrplot_function(df_sample, addCoef.col = "blue")
+meta <- data.frame(
+    group = c("Control", "Control", "Treatment", "Treatment"),
+    log2_col = c("LOG2.C1", "LOG2.C2", "LOG2.T1", "LOG2.T2")
+)
 
-# To display the plot, run:
-# print(p)
+# 2. Generate the plot
+p <- corrplot_function(df_sample, meta, addCoef.col = "blue")
 
+# 3. Display the plot (Important: in examples we just call the object)
+p
 }

@@ -26,5 +26,4 @@ in a data frame.
 my_data <- data.frame(p.value = rnorm(100))
 histogram(my_data, "p.value", "lightblue", "P-Value Distribution")
 
-
 }

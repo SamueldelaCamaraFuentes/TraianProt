@@ -27,13 +27,13 @@ network, and returns a list of mapped proteins.
 \examples{
 \donttest{
 if (requireNamespace("STRINGdb")) {
-  # Create synthetic data
-  limma_df <- data.frame(
-    Protein = c("P04637", "P00533"), # TP53, EGFR
-    expression = c("Up-regulated", "Up-regulated")
-  )
-  # Run function
-  interactions_list <- interactions_up(limma_df, taxonid = 9606, score = 400)
+    # Create synthetic data
+    limma_df <- data.frame(
+        Protein = c("P04637", "P00533"), # TP53, EGFR
+        expression = c("Up-regulated", "Up-regulated")
+    )
+    # Run function
+    interactions_list <- interactions_up(limma_df, taxonid = 9606, score = 400)
 }
 }
 

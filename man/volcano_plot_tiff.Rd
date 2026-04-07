@@ -60,23 +60,27 @@ or "-log10 q-value" (for adjusted p-values).
 mock_fc <- rnorm(100, 0, 2)
 
 limma_results <- data.frame(
-   logFC = mock_fc,
-   log2FC = mock_fc, # Use the vector we just created
-   Protein = paste0("PROT", 1:100),
-   p.value = runif(100, 0, 1),
-   adj.P.Val = runif(100, 0, 1),
-   sca.P.Value = runif(100, 0, 1),
-   sca.adj.pval = runif(100, 0, 1),
-   expression = sample(c("Up-regulated", "Down-regulated", "Unchanged"),
-                       100, replace = TRUE)
+    logFC = mock_fc,
+    log2FC = mock_fc, # Use the vector we just created
+    Protein = paste0("PROT", 1:100),
+    p.value = runif(100, 0, 1),
+    adj.P.Val = runif(100, 0, 1),
+    sca.P.Value = runif(100, 0, 1),
+    sca.adj.pval = runif(100, 0, 1),
+    expression = sample(c("Up-regulated", "Down-regulated", "Unchanged"),
+        100,
+        replace = TRUE
+    )
 )
 
 # Generate a static plot
-static_plot <- volcano_plot_tiff(limma = limma_results,
-                                 title = "Static Volcano Plot",
-                                 label = 3,
-                                 statval = 2,
-                                 psms = TRUE)
+static_plot <- volcano_plot_tiff(
+    limma = limma_results,
+    title = "Static Volcano Plot",
+    label = 3,
+    statval = 2,
+    psms = TRUE
+)
 
 print(static_plot)
 }

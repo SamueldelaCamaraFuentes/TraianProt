@@ -22,8 +22,8 @@ two columns, with marginal density plots.
 }
 \examples{
 my_data <- data.frame(
-  Sample1 = rnorm(100),
-  Sample2 = rnorm(100)
+    Sample1 = rnorm(100),
+    Sample2 = rnorm(100)
 )
 scatterplot_function(my_data, "Sample1", "Sample2")
 

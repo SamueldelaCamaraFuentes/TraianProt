@@ -38,12 +38,12 @@ proteins near the detection limit. It assumes missingness is not at random
 \examples{
 # Create synthetic LOG2 data with non-finite values (Inf)
 log_df <- data.frame(
-  Protein = c("ProtA", "ProtB", "ProtC", "ProtD"),
-  LOG2.S1 = c(10, 12, Inf, 8),
-  LOG2.S2 = c(11, 13, Inf, Inf),
-  # Add a KEEP column (e.g., from a filter)
-  # Here, we keep all proteins for calculation
-  KEEP = c(TRUE, TRUE, TRUE, TRUE)
+    Protein = c("ProtA", "ProtB", "ProtC", "ProtD"),
+    LOG2.S1 = c(10, 12, Inf, 8),
+    LOG2.S2 = c(11, 13, Inf, Inf),
+    # Add a KEEP column (e.g., from a filter)
+    # Here, we keep all proteins for calculation
+    KEEP = c(TRUE, TRUE, TRUE, TRUE)
 )
 
 # Specify columns to impute

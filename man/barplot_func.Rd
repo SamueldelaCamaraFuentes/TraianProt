@@ -27,20 +27,19 @@ faceted by cluster.
 # This example requires a valid enrichResult object.
 # We will create a minimal synthetic one.
 if (requireNamespace("DOSE") && requireNamespace("methods")) {
-  dummy_data <- data.frame(
-    Cluster = c("Up-regulated", "Down-regulated"),
-    Category = "BP", ID = c("GO:0006915", "GO:0007049"),
-    Description = c("apoptosis", "cell cycle"),
-    p.value = c(0.01, 0.02), adj.P.Val = c(0.01, 0.02),
-    query_size = c(50, 40), Count = c(5, 8), term_size = c(100, 120),
-    effective_domain_size = 10000, geneID = c("P04637", "P10415"),
-    GeneRatio = c("5/50", "8/40"), BgRatio = c("100/10000", "120/10000"),
-    Conditions = c("Up-regulated", "Down-regulated")
-  )
-  dummy_enrich_result <- methods::new("enrichResult", result = dummy_data)
-  terms_list <- list(NULL, dummy_enrich_result)
-  barplot_func(terms_list, number = 1, conditions = "My Plot")
+    dummy_data <- data.frame(
+        Cluster = c("Up-regulated", "Down-regulated"),
+        Category = "BP", ID = c("GO:0006915", "GO:0007049"),
+        Description = c("apoptosis", "cell cycle"),
+        p.value = c(0.01, 0.02), adj.P.Val = c(0.01, 0.02),
+        query_size = c(50, 40), Count = c(5, 8), term_size = c(100, 120),
+        effective_domain_size = 10000, geneID = c("P04637", "P10415"),
+        GeneRatio = c("5/50", "8/40"), BgRatio = c("100/10000", "120/10000"),
+        Conditions = c("Up-regulated", "Down-regulated")
+    )
+    dummy_enrich_result <- methods::new("enrichResult", result = dummy_data)
+    terms_list <- list(NULL, dummy_enrich_result)
+    barplot_func(terms_list, number = 1, conditions = "My Plot")
 }
-
 
 }

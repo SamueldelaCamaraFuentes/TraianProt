@@ -21,8 +21,8 @@ subtracting the median of each column.
 \examples{
 # Create a small, synthetic log-expression matrix
 log_df <- data.frame(
-  Sample1 = c(10.0, 10.2, 9.8),
-  Sample2 = c(12.0, 12.1, 11.9)
+    Sample1 = c(10.0, 10.2, 9.8),
+    Sample2 = c(12.0, 12.1, 11.9)
 )
 row.names(log_df) <- c("ProtA", "ProtB", "ProtC")
 

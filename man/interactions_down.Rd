@@ -26,13 +26,13 @@ plots the network.
 \examples{
 \donttest{
 if (requireNamespace("STRINGdb")) {
-  # Create synthetic data
-  limma_df <- data.frame(
-    Protein = c("P10415", "P62258"), # CALCA, ACTB
-    expression = c("Down-regulated", "Down-regulated")
-  )
-  # Run function
-  interactions_down(limma_df, taxonid = 9606, score = 400)
+    # Create synthetic data
+    limma_df <- data.frame(
+        Protein = c("P10415", "P62258"), # CALCA, ACTB
+        expression = c("Down-regulated", "Down-regulated")
+    )
+    # Run function
+    interactions_down(limma_df, taxonid = 9606, score = 400)
 }
 }
 

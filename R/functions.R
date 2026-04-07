@@ -1,6 +1,97 @@
+# Installing CRAN packages:
+if(!require(BiocManager)){install.packages("BiocManager")}
+library(BiocManager)
+if(!require(methods)){install.packages("methods")}
+library(methods)
+if(!require(colorspace)){install.packages("colorspace")}
+library(colorspace)
+if(!require(grid)){install.packages("grid")}
+library(grid)
+if(!require(utils)){install.packages("utils")}
+library(utils)
+if(!require(dplyr)){install.packages("dplyr")}
+library(dplyr)
+if(!require(ggplot2)){install.packages("ggplot2")}
+library(ggplot2)
+if(!require(ggrepel)){install.packages("ggrepel")}
+library(ggrepel)
+if(!require(VennDiagram)){install.packages("VennDiagram")}
+library(VennDiagram)
+if(!require(pheatmap)){install.packages("pheatmap")}
+library(pheatmap)
+if(!require(VIM)){install.packages("VIM")}
+library(VIM)
+if(!require(wrProteo)){install.packages("wrProteo")}
+library(wrProteo)
+if(!require(wrMisc)){install.packages("wrMisc")}
+library(wrMisc)
+if(!require(gplots)){install.packages("gplots")}
+library(gplots)
+if(!require(gprofiler2)){install.packages("gprofiler2")}
+library(gprofiler2) 
+if(!require(writexl)){install.packages("writexl")}
+library(writexl)
+if(!require(igraph)){install.packages("igraph")}
+library(igraph)
+if(!require(plotly)){install.packages("plotly")}
+library(plotly)
+if(!require(matrixStats)){install.packages("matrixStats")}
+library(matrixStats)
+if(!require(ggExtra)){install.packages("ggExtra")}
+library(ggExtra)
+if(!require(corrplot)){install.packages("corrplot")}
+library(corrplot)
+if(!require(lme4)){install.packages("lme4")}
+library(lme4)
+if(!require(matrixStats)){install.packages("matrixStats")}
+library(matrixStats)
+if(!require(DEqMS)){install.packages("DEqMS")}
+library(DEqMS)
+if(!require(dplyr)){install.packages("dplyr")}
+library(dplyr)
+if(!require(devtools)){install.packages("devtools")}
+library(devtools)
+if(!require(Rtsne)){install.packages("Rtsne")}
+library(Rtsne)
+if(!require(remotes)){install.packages("remotes")}
+library(remotes)
+if(!require(data.table)){install.packages("data.table")}
+library(data.table)
+if(!require(tidyverse)){install.packages("tidyverse")}
+library(tidyverse)
+if(!require(gtools)){install.packages("gtools")}
+library(gtools)
+
+#Installing bioconductor packages: 
+if(!require(rsconnect)){BiocManager::install("rsconnect",update=F,ask=F)}
+library(rsconnect)
+if(!require(BiocGenerics)){BiocManager::install("BiocGenerics",update=F,ask=F)}
+library(BiocGenerics)
+if(!require(Biobase)){BiocManager::install("Biobase",update=F,ask=F)}
+library(Biobase)
+if(!require(S4Vectors)){BiocManager::install("S4Vectors",update=F,ask=F)}
+library(S4Vectors)
+if(!require(vsn)){BiocManager::install("vsn",update=F,ask=F)}
+library(vsn)
+if(!require(IRanges)){BiocManager::install("IRanges",update=F,ask=F)}
+if(!require(AnnotationDbi)){BiocManager::install("AnnotationDbi",update=F,ask=F)}
+library(AnnotationDbi)
+if(!require(limma)){BiocManager::install("limma",update=F,ask=F)}
+library(limma)
+if(!require(qvalue)){BiocManager::install("qvalue",update=F,ask=F)}
+library(qvalue)
+if(!require(clusterProfiler)){BiocManager::install("clusterProfiler",update=F,ask=F)}
+library(clusterProfiler)
+if(!require(enrichplot)){BiocManager::install("enrichplot",update=F,ask=F)}
+library(enrichplot)
+if(!require(DOSE)){BiocManager::install("DOSE",update=F,ask=F)}
+library(DOSE)
+if(!require(STRINGdb)){BiocManager::install("STRINGdb",update=F,ask=F)}
+library(STRINGdb)
+
+
 
 #################################### helper functions ####################################
-
 
 ##################################################################################
 #Quick filtering
@@ -85,8 +176,7 @@ quick_filtering <- function(raw, platform, organism, metadata, selected_conditio
       df$Protein_description <- regmatches( df$Fasta.headers, match)
     }
 
-
-    df[intensity_names] <- sapply(df[intensity_names], as.numeric)
+    df[intensity_names] <- lapply(df[intensity_names], as.numeric)
     LOG_names <- sub("Intensity", "LOG2", intensity_names)
     df[LOG_names] <- log2(df[intensity_names])
 
@@ -115,7 +205,7 @@ quick_filtering <- function(raw, platform, organism, metadata, selected_conditio
       colnames(df)[3] <- "Protein_description"
     }
 
-    df[intensity_names] <- sapply(df[intensity_names], as.numeric)
+    df[intensity_names] <- lapply(df[intensity_names], as.numeric)
     LOG2.names <- metadata$log2_col
     df[LOG2.names] <- log2(df[intensity_names])
 
@@ -136,7 +226,7 @@ quick_filtering <- function(raw, platform, organism, metadata, selected_conditio
 
     colnames(df)[length(colnames(df)) - (length(intensity_columns)-1):length(colnames(intensity_columns))] <- new_names
     intensity_names <- grep("\\.(d|raw)$", colnames(df), value = TRUE)
-    df[intensity_names] <- sapply(df[intensity_names], as.numeric)
+    df[intensity_names] <- lapply(df[intensity_names], as.numeric)
     LOG2.names <- sub("\\.(d|raw)$", ".LOG2", intensity_names)
     df[LOG2.names] <- log2(df[intensity_names])
 
@@ -287,7 +377,7 @@ quick_filtering <- function(raw, platform, organism, metadata, selected_conditio
     df <- raw
 
     abundance_names <- grep("Abundance:", intensity_names, value = TRUE)
-    df[abundance_names] <- sapply(df[abundance_names], as.numeric)
+    df[intensity_names] <- lapply(df[intensity_names], as.numeric)
     LOG2.names <- sub("^Abundance:", "LOG2", abundance_names)
     df[LOG2.names] <- log2(df[abundance_names])
 
@@ -308,9 +398,7 @@ quick_filtering <- function(raw, platform, organism, metadata, selected_conditio
 
     colnames(df)[1] <- "Protein"
     colnames(df)[4] <- "Protein_description"
-
-
-    df[intensity_names] <- sapply(df[intensity_names], as.numeric)
+    df[intensity_names] <- lapply(df[intensity_names], as.numeric)
     LOG2.names <- sub("Intensity", ".LOG2", intensity_names)
     df[LOG2.names] <- log2(df[intensity_names])
 
@@ -436,16 +524,17 @@ obtain_unique_proteins <- function(df, metadata, selected_conditions){
 
   total_replicas <- replicas_condicion1 + replicas_condicion2
 
-  finite_sums <- rowSums(is.finite(df2[, 1:replicas_condicion1]))
-  infinite_sums <- rowSums(!is.finite(df2[, (replicas_condicion1 + 1):total_replicas]))
+  finite_sums <- rowSums(is.finite(df2[, seq_len(replicas_condicion1), drop = FALSE]))
+  indices_cond2 <- seq(from = replicas_condicion1 + 1, to = total_replicas)
+  infinite_sums <- rowSums(!is.finite(df2[, indices_cond2, drop = FALSE]))
 
-  cond1_exclusive <- Reduce(`|`, lapply(0:(replicas_condicion2 - 1), function(i) {
+  cond1_exclusive <- Reduce(`|`, lapply(seq_len(replicas_condicion2) - 1, function(i) {
     condition <- finite_sums == (replicas_condicion1 - i) & infinite_sums == replicas_condicion2
     sufficient_presence <- finite_sums >= ceiling(replicas_condicion1 / 2)
     condition & sufficient_presence
   }))
 
-  cond2_exclusive <- Reduce(`|`, lapply(1:replicas_condicion2, function(i) {
+  cond2_exclusive <- Reduce(`|`, lapply(seq_len(replicas_condicion2), function(i) {
     condition <- finite_sums == 0 & infinite_sums == (replicas_condicion2 - i)
     sufficient_presence <- infinite_sums <= ceiling(replicas_condicion2 / 2)
     condition & sufficient_presence
@@ -457,7 +546,11 @@ obtain_unique_proteins <- function(df, metadata, selected_conditions){
   cond1_unicas <- dplyr::filter(df, df$cond1_exclusive)
   cond2_unicas <- dplyr::filter(df, df$cond2_exclusive)
 
-  return(list(cond1_unicas, cond2_unicas))
+  lista_resultados <- list(cond1_unicas, cond2_unicas)
+
+  names(lista_resultados) <- c(first_group, second_group)
+
+  return(lista_resultados)
 }
 
 ##################################################################################
@@ -500,43 +593,42 @@ obtain_unique_proteins <- function(df, metadata, selected_conditions){
 #'   print(plot_result)
 #'
 #'
+#'
 identify_proteins <- function(raw, metadata, platform, selected_conditions) {
-
-  # --- 1. Get sample names for each condition ---
   first_group <- unique(metadata$group)[unique(metadata$group) == selected_conditions[2]]
-  condition1_names <- metadata %>%
-    dplyr::filter(group == first_group) %>%
-    dplyr::pull(intensity_sample_name)
-
   second_group <- unique(metadata$group)[unique(metadata$group) == selected_conditions[1]]
-  condition2_names <- metadata %>%
-    dplyr::filter(group == second_group) %>%
-    dplyr::pull(intensity_sample_name)
 
-  condi.names <- c(condition1_names, condition2_names)
+  target_metadata <- metadata %>%
+    dplyr::filter(group %in% c(first_group, second_group))
 
-  # --- 2. Filter data based on platform ---
+  condi.names <- target_metadata$intensity_sample_name
+  condi.groups <- target_metadata$group
+
+
   filt <- list()
   if (platform %in% c(1, 2, 4, 5)) {
     for (i in seq_along(condi.names)) {
-      filt[[i]] <- raw[raw[, condi.names[i]] > 0, ]
+      filt[[i]] <- raw[raw[, condi.names[i]] > 0, , drop = FALSE]
     }
   } else if (platform == 3) {
     for (i in seq_along(condi.names)) {
-      filt[[i]] <- raw[complete.cases(raw[, condi.names[i]]), ]
+      filt[[i]] <- raw[complete.cases(raw[, condi.names[i]]), , drop = FALSE]
     }
   }
 
-  protein_counts <- sapply(filt, nrow)
+  protein_counts <- vapply(filt, nrow, FUN.VALUE = integer(1))
+
   plot_data <- data.frame(
     Sample = condi.names,
     Count = protein_counts,
-    Condition = rep(c(first_group, second_group), times = c(length(condition1_names), length(condition2_names)))
+    Condition = condi.groups
   )
+
+  plot_data$Sample <- factor(plot_data$Sample, levels = condi.names)
 
   plot_object <- ggplot2::ggplot(plot_data, ggplot2::aes(x = Sample, y = Count, fill = Condition)) +
     ggplot2::geom_bar(stat = "identity", color = "black") +
-    ggplot2::scale_fill_manual(values = c("light green", "light blue")) + # You can customize colors here
+    ggplot2::scale_fill_manual(values = c("light green", "light blue")) +
     ggplot2::labs(
       title = "Proteinas Cuantificadas",
       x = "Muestras",
@@ -544,11 +636,97 @@ identify_proteins <- function(raw, metadata, platform, selected_conditions) {
     ) +
     ggplot2::theme_classic() +
     ggplot2::theme(
-      axis.text.x = ggplot2::element_text(angle = 60, hjust = 1), # Better angle for long names
+      axis.text.x = ggplot2::element_text(angle = 60, hjust = 1),
       plot.title = ggplot2::element_text(hjust = 0.5, face = "bold")
     )
 
   return(plot_object)
+}
+
+#' @title Create power curve
+#' @description Calculates the theoretical power curve based on the observed variability
+#'    in the experimental data and a desired Fold Change.
+#'
+#' @param df A data.frame or matrix containing the expression data.
+#' @param log2_cols Character vector or numeric indices indicating which
+#'    columns of `df` contain the abundance values (must be numeric).
+#' @param foldchange Numeric. The expected Fold Change to calculate the power
+#'    (e.g., 2 for doubling, 0.5 for halving).
+#' @param replicatespower Numeric. Number of replicates per group.
+#' @param alpha_level_choice Numeric. Choice to consider either p-value or adjusted p-value.
+#' @param alpha_level Numeric. Global significance level before
+#'    correction (defaults to 0.05).
+#'
+#' @return A `ggplot` object containing the power curve.
+#' @import ggplot2
+#' @importFrom stats power.t.test median sd
+#' @export
+#'
+#' @examples
+#' # Simulated data
+#' data <- data.frame(ID = letters[1:10],
+#'                    R1 = rnorm(10), R2 = rnorm(10), R3 = rnorm(10))
+#' plot <- traianprot_power_curve(data, c("R1", "R2", "R3"), foldchange = 2)
+#' print(plot)
+traianprot_power_curve <- function(df, log2_cols, foldchange, replicatespower, alpha_level_choice, alpha_level) {
+
+  if (!is.data.frame(df) && !is.matrix(df)) {
+    stop("El argumento 'df' debe ser un data.frame o una matriz.", call. = FALSE)
+  }
+  if (!is.numeric(foldchange) || length(foldchange) != 1) {
+    stop("'foldchange' debe ser un único valor numérico.")
+  }
+
+  datos_num <- df[, log2_cols, drop = FALSE]
+
+  if (!all(vapply(datos_num, is.numeric, logical(1)))) {
+    stop("Las columnas seleccionadas en 'log2_cols' deben ser numéricas.", call. = FALSE)
+  }
+
+  row_sds <- apply(datos_num, 1, stats::sd, na.rm = TRUE)
+
+  if (all(is.na(row_sds))) {
+    stop("No se pudo calcular la desviación estándar. Verifique sus datos.", call. = FALSE)
+  }
+
+  sigma_estimada <- stats::median(row_sds, na.rm = TRUE)
+  delta <- log2(foldchange)
+
+  if ( alpha_level_choice == 1){
+    sig_level_adj <- alpha_level
+  } else if (alpha_level_choice == 2){
+    sig_level_adj <- alpha_level / nrow(df)
+  }
+
+
+  tam_muestrales <- 2:replicatespower
+
+  potencias <- vapply(tam_muestrales, function(n) {
+    res <- stats::power.t.test(n = n,
+                               delta = delta,
+                               sd = sigma_estimada,
+                               sig.level = sig_level_adj,
+                               type = "two.sample",
+                               alternative = "two.sided")
+    return(res$power)
+  }, FUN.VALUE = numeric(1))
+
+  plot_data <- data.frame(Replicados = tam_muestrales, Potencia = potencias)
+
+  p <- ggplot2::ggplot(plot_data, ggplot2::aes(x = .data$Replicados, y = .data$Potencia)) +
+    ggplot2::geom_line(color = "#2E86C1", linewidth = 1.2) + # linewidth actualizado
+    ggplot2::geom_point(size = 3, color = "#1B4F72") +
+    ggplot2::geom_hline(yintercept = 0.8, linetype = "dashed", color = "red") +
+    ggplot2::theme_minimal() +
+    ggplot2::labs(
+      title = "Power Curve for Proteomic Analysis",
+      subtitle = sprintf("Sigma (est) = %.2f | Fold Change = %.2f",
+                         sigma_estimada, foldchange),
+      y = "Statistical Power (1 - beta)",
+      x = "Number of Replicates per Group"
+    )
+
+  return(p)
 }
 #Venn Diagram
 #' @title Create a Venn Diagram
@@ -559,8 +737,6 @@ identify_proteins <- function(raw, metadata, platform, selected_conditions) {
 #' @param unique_proteins A list containing two data frames:
 #'                        1. Proteins unique to the first set.
 #'                        2. Proteins unique to the second set.
-#' @param label1 Label for the first set (e.g., "Control").
-#' @param label2 Label for the second set (e.g., "Treatment").
 #' @param color1 Color for the first set.
 #' @param color2 Color for the second set.
 #'
@@ -591,8 +767,6 @@ identify_proteins <- function(raw, metadata, platform, selected_conditions) {
 #' my_venn_plot <- venn_diagram(
 #'   df = common_proteins,
 #'   unique_proteins = unique_protein_list,
-#'   label1 = "Control",
-#'   label2 = "Treatment",
 #'   color1 = "blue",
 #'   color2 = "red"
 #' )
@@ -601,7 +775,12 @@ identify_proteins <- function(raw, metadata, platform, selected_conditions) {
 #' grid::grid.newpage()
 #' grid::grid.draw(my_venn_plot)
 #'
-venn_diagram <- function(df, unique_proteins, label1, label2, color1, color2){
+venn_diagram <- function(df, unique_proteins, color1, color2){
+
+  nombres_grupos <- names(unique_proteins)
+
+  label1 <- nombres_grupos[2]
+  label2 <- nombres_grupos[1]
 
   # Create cond1_set by adding unique_proteins[[2]] to df
   cond1_set <- dplyr::bind_rows(df, unique_proteins[[2]]) %>% dplyr::distinct()
@@ -683,7 +862,7 @@ filter_valids <- function(df, metadata, unique_proteins, min_prop = NULL,
                           at_least_one = FALSE, labeltype = 1) {
 
   groups <- unique(metadata$group)
-  if (length(groups) < 2) stop("You need at least two conditions.")
+  if (length(groups) < 2) stop("You need at least two conditions.", call. = FALSE)
 
   cond.names <- lapply(groups, function(g) {
     metadata %>%
@@ -692,7 +871,11 @@ filter_valids <- function(df, metadata, unique_proteins, min_prop = NULL,
   })
   names(cond.names) <- groups
 
-  min_count <- sapply(cond.names, function(cols) ceiling(length(cols) * min_prop))
+  min_count <- vapply(
+    cond.names,
+    function(cols) ceiling(length(cols) * min_prop),
+    FUN.VALUE = numeric(1)
+  )
 
   # Remove unique proteins
   total_unique_proteins <- rbind(unique_proteins[[1]], unique_proteins[[2]])
@@ -705,10 +888,14 @@ filter_valids <- function(df, metadata, unique_proteins, min_prop = NULL,
 
   if (labeltype == 1) {
     # Filter by non-NA counts per condition
-    cond.filter <- sapply(seq_along(cond.names), function(i) {
-      mat <- as.matrix(common_df[cond.names[[i]]])
-      rowSums(is.finite(mat)) >= min_count[i]
-    })
+    cond.filter <- vapply(
+      seq_along(cond.names),
+      function(i) {
+        mat <- as.matrix(common_df[cond.names[[i]]])
+        rowSums(is.finite(mat)) >= min_count[i]
+      },
+      FUN.VALUE = logical(nrow(common_df))
+    )
 
     common_df$KEEP <- if (at_least_one) {
       apply(cond.filter, 1, any)
@@ -721,7 +908,7 @@ filter_valids <- function(df, metadata, unique_proteins, min_prop = NULL,
     # Replace non-finite values with NA
     cols_to_modify <- unlist(cond.names)
     common_df[cols_to_modify] <- lapply(common_df[cols_to_modify], function(col) {
-      col[!is.finite(col)] <- NA
+      col[is.na(col) | !is.finite(col)] <- NA
       return(col)
     })
   } else if (labeltype == 2) {
@@ -816,7 +1003,7 @@ unique_peptides_filter <- function(df, metadata, number, min_fraction) {
 
   # Get sample column names per condition
   groups <- unique(metadata$group)
-  if (length(groups) < 2) stop("You need at least two conditions.")
+  if (length(groups) < 2) stop("You need at least two conditions.", call. = FALSE)
 
   condition_columns <- lapply(groups, function(g) {
     metadata %>%
@@ -999,7 +1186,7 @@ impute_data <- function(df, LOG2.names, width = 0.3, downshift = 1.8) {
   df[LOG2.names] <- lapply(LOG2.names,
                            function(x) {
                              temp <- df[[x]]
-                             temp[!is.finite(temp)] = NA
+                             temp[!is.finite(temp)] <- NA
 
                              temp.sd <- width * sd(temp[df$KEEP], na.rm = TRUE) # shrink sd width
                              temp.mean <- mean(temp[df$KEEP], na.rm = TRUE) -
@@ -1055,7 +1242,7 @@ impute_KNN_data <- function(df, LOG2.names, ...){
   df[LOG2.names] <- lapply(LOG2.names,
                            function(x) {
                              temp <- df[[x]]
-                             temp[!is.finite(temp)] = NA
+                             temp[!is.finite(temp)] <- NA
                              return(temp)
 
                            })
@@ -1154,16 +1341,14 @@ plotCV2 <- function(y, trend = TRUE, main= "Imputation check", ...){
 boxplot_function <- function(df, metadata, selected_conditions) {
 
   first_group <- unique(metadata$group)[unique(metadata$group) == selected_conditions[2]]
-  condition1_names <- metadata %>%
-    dplyr::filter(group == first_group) %>%
-    dplyr::pull(log2_col)
-
   second_group <- unique(metadata$group)[unique(metadata$group) == selected_conditions[1]]
-  condition2_names <- metadata %>%
-    dplyr::filter(group == second_group) %>%
+
+  cond.names <- metadata %>%
+    dplyr::filter(group %in% c(first_group, second_group)) %>%
     dplyr::pull(log2_col)
 
-  cond.names <- c(condition1_names, condition2_names)
+  condition1_names <- metadata %>% dplyr::filter(group == first_group) %>% dplyr::pull(log2_col)
+  condition2_names <- metadata %>% dplyr::filter(group == second_group) %>% dplyr::pull(log2_col)
 
   plot_data_long <- df %>%
     dplyr::select(dplyr::all_of(cond.names)) %>%
@@ -1176,7 +1361,9 @@ boxplot_function <- function(df, metadata, selected_conditions) {
       Sample %in% condition1_names ~ first_group,
       Sample %in% condition2_names ~ second_group
     )) %>%
-    na.omit() # Remove rows with missing intensities (na.omit is base R)
+
+    dplyr::mutate(Sample = factor(Sample, levels = cond.names)) %>%
+    na.omit()
 
   plot_object <- ggplot2::ggplot(plot_data_long, ggplot2::aes(x = Sample, y = Intensity, fill = Condition)) +
     ggplot2::geom_boxplot() +
@@ -1398,6 +1585,8 @@ qqplot_function <- function(df, colname1, colname2, color){
 #'
 #' @param df A data frame. The columns for which correlations are desired should
 #'   be numeric. Non-numeric columns will be ignored by `cor()`.
+#' @param metadata A metadata data frame. Must contain 'group' and
+#'  'log2_col' columns to map samples to groups.
 #' @param display A string specifying the visual representation (e.g., "circle").
 #'   **Note:** This parameter is currently not implemented in the function body,
 #'   which defaults to 'tile'.
@@ -1422,29 +1611,43 @@ qqplot_function <- function(df, colname1, colname2, color){
 #' @importFrom stats cor
 #'
 #' @export
-#'
 #' @examples
-#' # Create a sample data frame
 #' df_sample <- data.frame(
-#'   A = rnorm(20),
-#'   B = rnorm(20),
-#'   C = rnorm(20)
+#'   LOG2.C1 = rnorm(20, mean = 10),
+#'   LOG2.C2 = rnorm(20, mean = 10),
+#'   LOG2.T1 = rnorm(20, mean = 12),
+#'   LOG2.T2 = rnorm(20, mean = 12)
 #' )
 #'
-#' # Generate the plot
-#' p <- corrplot_function(df_sample, addCoef.col = "blue")
+#' meta <- data.frame(
+#'   group = c("Control", "Control", "Treatment", "Treatment"),
+#'   log2_col = c("LOG2.C1", "LOG2.C2", "LOG2.T1", "LOG2.T2")
+#' )
 #'
-#' # To display the plot, run:
-#' # print(p)
+#' # 2. Generate the plot
+#' p <- corrplot_function(df_sample, meta, addCoef.col = "blue")
 #'
-corrplot_function <- function(df, display = "circle", tl.col = "black", addCoef.col = "black") {
+#' # 3. Display the plot (Important: in examples we just call the object)
+#' p
+corrplot_function <- function(df, metadata, display = "circle", tl.col = "black", addCoef.col = "black") {
+  ordered_samples <- metadata$log2_col[metadata$log2_col %in% colnames(df)]
 
-  df_cor <- cor(df, use = "complete.obs", method = "pearson") # cor is base R
+  if (length(ordered_samples) < 2) {
+    stop("No se encuentran suficientes coincidencias entre el metadata y las columnas del dataframe.", call. = FALSE)
+  }
 
-  # Modern way using tidyr and tibble (both part of tidyverse)
+  df <- df[, ordered_samples, drop = FALSE]
+
+  df_cor <- cor(df, use = "complete.obs", method = "pearson")
+
+  df_cor[is.na(df_cor)] <- 0
+
   melted_cormat <- as.data.frame(df_cor) %>%
     tibble::rownames_to_column("Var1") %>%
     tidyr::pivot_longer(-Var1, names_to = "Var2", values_to = "value")
+
+  melted_cormat$Var1 <- factor(melted_cormat$Var1, levels = ordered_samples)
+  melted_cormat$Var2 <- factor(melted_cormat$Var2, levels = ordered_samples)
 
   plot_object <- ggplot2::ggplot(data = melted_cormat, ggplot2::aes(x = Var1, y = Var2, fill = value)) +
     ggplot2::geom_tile(color = "white") +
@@ -1455,20 +1658,21 @@ corrplot_function <- function(df, display = "circle", tl.col = "black", addCoef.
       space = "Lab",
       name = "Pearson\nCorrelation"
     ) +
-    ggplot2::theme_minimal() + # A clean theme
+    ggplot2::theme_minimal() +
     ggplot2::theme(
       axis.text.x = ggplot2::element_text(angle = 45, vjust = 1, hjust = 1),
       axis.title.x = ggplot2::element_blank(),
       axis.title.y = ggplot2::element_blank()
     ) +
-    ggplot2::coord_fixed() # Ensures the plot is square
+    ggplot2::coord_fixed()
 
   plot_object <- plot_object +
     ggplot2::geom_text(
-      ggplot2::aes(label = round(value, 2)), # Round coefficients to 2 decimal places
+      ggplot2::aes(label = round(value, 2)),
       color = addCoef.col,
       size = 3
     )
+
   return(plot_object)
 }
 
@@ -1581,7 +1785,10 @@ corrplot_function <- function(df, display = "circle", tl.col = "black", addCoef.
 #' print(results)
 #'
 #'
-statistical_analysis <- function(df, test, paired = FALSE, metadata, logfc, sig, adjval, statval, unique_proteins, way, psms, platform, selected_conditions, diann_dir = NULL){
+statistical_analysis <- function(df, test, paired = FALSE, metadata, logfc, sig,
+                                 adjval, statval, unique_proteins, way, psms,
+                                 platform, selected_conditions,
+                                diann_dir = NULL){
 
   first_group <- unique(metadata$group)[unique(metadata$group) == selected_conditions[2]]
 
@@ -1605,40 +1812,30 @@ statistical_analysis <- function(df, test, paired = FALSE, metadata, logfc, sig,
 
   if (test == 2){
     if (psms == TRUE){
-      #Control columns
-      for (i in 1:replicas_condicion1){
-        nam <- paste("control_sample", i, sep = "")
-        assign(nam, condition1_names[i])
-      }
 
-      #Treatment columns
-      for (i in 1:replicas_condicion2){
-        nam <- paste("prob_column", i, sep = "")
-        assign(nam, condition2_names[i])
-      }
-      ct <- c()
-      for (i in ls()[grep("control_sample", ls())]){
-        new_value_control <- get(i)
-        ct <- c(ct, new_value_control)
-      }
-      print(ct)
-
-      tr <- c()
-      for (i in ls()[grep("prob_column", ls())]){
-        new_value_prob <- get(i)
-        tr <- c(tr, new_value_prob)
-      }
-      print(tr)
+      ct <- condition1_names[seq_len(replicas_condicion1)]
+      tr <- condition2_names[seq_len(replicas_condicion2)]
+      names(ct) <- paste0("control_sample", seq_len(replicas_condicion1))
+      names(tr) <- paste0("prob_column", seq_len(replicas_condicion2))
+      #print(tr)
 
       if (paired == FALSE){
         control <- rep(1, replicas_condicion1)
         treatment <- rep(2, replicas_condicion2)
         design <- model.matrix(~factor(c(control, treatment))) # base R (stats)
+        coef_col <- 2
       } else if (paired == TRUE){
-        pairinfo = factor(rep(1:replicas_condicion1,2))
+
+        if (replicas_condicion1 != replicas_condicion2) {
+          stop("You selected 'paired = TRUE' but diferent sample number per group.",
+                     "Control:", replicas_condicion1, "vs Treatment:", replicas_condicion2,
+                     ". for paired analysis their sample number must be identical.")
+        }
+        pairinfo <- factor(rep(seq_len(replicas_condicion1), 2))
         control <- rep(1, replicas_condicion1)
         treatment <- rep(2, replicas_condicion2)
         design <- model.matrix(~pairinfo+factor(c(control, treatment))) # base R (stats)
+        coef_col <- ncol(design)
       }
 
       dat <- df[, c(ct, tr)]
@@ -1646,9 +1843,9 @@ statistical_analysis <- function(df, test, paired = FALSE, metadata, logfc, sig,
       fit <- limma::lmFit(dat, design)
       fit.eb <- limma::eBayes(fit)
       if (platform == 1){ #MaxQuant
-        count_columns = grep("Razor...unique.peptides", colnames(df))
-        df[count_columns] <- sapply(df[count_columns], as.numeric)
-        psm.count.table = data.frame(count = matrixStats::rowMins(
+        count_columns <- grep("Razor...unique.peptides", colnames(df))
+        df[count_columns] <- lapply(df[count_columns], as.numeric)
+        psm.count.table <- data.frame(count = matrixStats::rowMins(
           as.matrix(df[,count_columns])), row.names =  df$Protein)
 
         #psm.count.table[psm.count.table$count == 0] <- 1 # Añadimos solo un uno para los casos en los que el valor de PSMs es igual a 0
@@ -1686,22 +1883,22 @@ statistical_analysis <- function(df, test, paired = FALSE, metadata, logfc, sig,
       }
       fit <- DEqMS::spectraCounteBayes(fit.eb)
 
-      coef_col <- 2 #Para acceder a la columna de LogFC y P value
-
-      results.eb = limma::topTable(fit,coef = coef_col,n= Inf)
+      results.eb <- limma::topTable(fit,coef = coef_col,n= Inf, adjust.method = adjval)
       p.value.column <- grep("P.Value", colnames(results.eb))
       colnames(results.eb)[p.value.column] <- "p.value"
-      results.eb$adj.P.Val  = p.adjust(results.eb$p.value, # base R (stats)
-                                       method = adjval)
+      p.adj.column <- grep("adj.P.Val", colnames(results.eb))
+      colnames(results.eb)[p.adj.column] <- "adj.P.Val"
+      #results.eb$adj.P.Val  <- p.adjust(results.eb$p.value, # base R (stats)
+                                       #method = adjval)
 
-      results.eb$Protein = as.numeric(rownames(results.eb))
+      results.eb$Protein <- as.numeric(rownames(results.eb))
       #results.eb$count = fit$count[results.eb$Protein]
 
-      results.eb$sca.t = fit$sca.t[results.eb$Protein,coef_col]
-      results.eb$sca.P.Value = as.numeric(fit$sca.p[results.eb$Protein,coef_col])
-      results.eb$sca.adj.pval = as.numeric(p.adjust(results.eb$sca.P.Value, # base R (stats)
+      results.eb$sca.t <- fit$sca.t[results.eb$Protein,coef_col]
+      results.eb$sca.P.Value <- as.numeric(fit$sca.p[results.eb$Protein,coef_col])
+      results.eb$sca.adj.pval <- as.numeric(p.adjust(results.eb$sca.P.Value, # base R (stats)
                                                     method = "BH"))
-      results.eb = results.eb[order(results.eb$sca.P.Value), ]
+      results.eb <- results.eb[order(results.eb$sca.P.Value), ]
 
       if (statval == 1){
         expression <- dplyr::case_when(results.eb$logFC >= logfc & -log10(results.eb$sca.P.Value) >= -log10(sig) ~ "Up-regulated",
@@ -1725,7 +1922,7 @@ statistical_analysis <- function(df, test, paired = FALSE, metadata, logfc, sig,
         return(results.eb)
       } else if (way == 2){
         #Empezamos a trabajar con las unicas control
-        unique.control <- as.data.frame(unique_proteins[1])
+        unique.control <- as.data.frame(unique_proteins[[1]])
         fusioncontrol.df <- data.frame(matrix(ncol = 8))
         n <-  c("logFC", "p.value", "adj.P.Val", "expression", "Protein", "Protein_description", "sca.P.Value", "sca.adj.pval")
         colnames(fusioncontrol.df) <- n
@@ -1736,7 +1933,7 @@ statistical_analysis <- function(df, test, paired = FALSE, metadata, logfc, sig,
         }
         fusioncontrol.df <- fusioncontrol.df[-1,]
 
-        unique.treatment <- as.data.frame(unique_proteins[2])
+        unique.treatment <- as.data.frame(unique_proteins[[2]])
         fusiontreatment.df <- data.frame(matrix(ncol = 8))
         n <-  c("logFC", "p.value", "adj.P.Val", "expression", "Protein", "Protein_description", "sca.P.Value", "sca.adj.pval")
         colnames(fusiontreatment.df) <- n
@@ -1752,7 +1949,7 @@ statistical_analysis <- function(df, test, paired = FALSE, metadata, logfc, sig,
         row.names(unique.proteins.limma) <- unique.proteins.limma$Protein
 
 
-        unique.proteins.limma[c("logFC", "p.value", "adj.P.Val", "sca.P.Value", "sca.adj.pval")] <- sapply(unique.proteins.limma[c("logFC", "p.value", "adj.P.Val", "sca.P.Value", "sca.adj.pval")], as.numeric)
+        unique.proteins.limma[c("logFC", "p.value", "adj.P.Val", "sca.P.Value", "sca.adj.pval")] <- lapply(unique.proteins.limma[c("logFC", "p.value", "adj.P.Val", "sca.P.Value", "sca.adj.pval")], as.numeric)
 
         results.eb <- rbind(unique.proteins.limma, results.eb)
         #row.names(results.eb) <- make.unique(results.eb$Protein)
@@ -1760,73 +1957,67 @@ statistical_analysis <- function(df, test, paired = FALSE, metadata, logfc, sig,
       }
 
     } else if (psms == FALSE){
-      #Control columns
-      for (i in 1:replicas_condicion1){
-        nam <- paste("control_sample", i, sep = "")
-        assign(nam, condition1_names[i])
-      }
-
-      #Treatment columns
-      for (i in 1:replicas_condicion2){
-        nam <- paste("prob_column", i, sep = "")
-        assign(nam, condition2_names[i])
-      }
-      ct <- c()
-      for (i in ls()[grep("control_sample", ls())]){
-        new_value_control <- get(i)
-        ct <- c(ct, new_value_control)
-      }
-      print(ct)
-
-      tr <- c()
-      for (i in ls()[grep("prob_column", ls())]){
-        new_value_prob <- get(i)
-        tr <- c(tr, new_value_prob)
-      }
-      print(tr)
+      ct <- condition1_names[seq_len(replicas_condicion1)]
+      tr <- condition2_names[seq_len(replicas_condicion2)]
+      names(ct) <- paste0("control_sample", seq_len(replicas_condicion1))
+      names(tr) <- paste0("prob_column", seq_len(replicas_condicion2))
+      #print(tr)
 
       if (paired == FALSE){
         control <- rep(1, replicas_condicion1)
         treatment <- rep(2, replicas_condicion2)
         design <- model.matrix(~factor(c(control, treatment))) # base R (stats)
+        coef_col <- 2
       } else if (paired == TRUE){
-        pairinfo = factor(rep(1:replicas_condicion1,2))
+        if (replicas_condicion1 != replicas_condicion2) {
+          stop("You selected 'paired = TRUE' but diferent sample number per group.",
+                     "Control:", replicas_condicion1, "vs Treatment:", replicas_condicion2,
+                     ". for paired analysis their sample number must be identical.", call. = FALSE)
+        }
+        pairinfo <- factor(rep(seq_len(replicas_condicion1), 2))
         control <- rep(1, replicas_condicion1)
         treatment <- rep(2, replicas_condicion2)
         design <- model.matrix(~pairinfo+factor(c(control, treatment))) # base R (stats)
+        coef_col <- ncol(design)
       }
 
       dat <- df[, c(ct, tr)]
       n <- dim(dat)[1]
       fit <- limma::lmFit(dat, design)
       fit.eb <- limma::eBayes(fit)
-      print(colnames(fit.eb))
-      logFC <- fit.eb$coefficients[, 2] #Calculo del log fold-change
-      p.value <- fit.eb$p.value[, 2]    # p-valor moderado correspondiente al estad?stico t moderado.
-      adj.P.Val <- p.adjust(p.value, method = adjval) # base R (stats)
+      #print(colnames(fit.eb))
+      results.eb <- limma::topTable(fit.eb,coef = coef_col,n= Inf, adjust.method = adjval)
+      p.value.column <- grep("P.Value", colnames(results.eb))
+      colnames(results.eb)[p.value.column] <- "p.value"
+      p.adj.column <- grep("adj.P.Val", colnames(results.eb))
+      colnames(results.eb)[p.adj.column] <- "adj.P.Val"
+
+      results.eb$Protein <- as.numeric(rownames(results.eb))
 
       if (statval == 1){
-        expression <- dplyr::case_when(logFC >= logfc & -log10(p.value) >= -log10(sig) ~ "Up-regulated",
-                                       logFC <= -logfc & -log10(p.value) >= -log10(sig) ~ "Down-regulated",
+        expression <- dplyr::case_when(results.eb$logFC >= logfc & -log10(results.eb$p.value) >= -log10(sig) ~ "Up-regulated",
+                                       results.eb$logFC <= -logfc & -log10(results.eb$p.value) >= -log10(sig) ~ "Down-regulated",
                                        TRUE ~ "Unchanged")#labels para expresion
       } else if (statval == 2){
-        expression <- dplyr::case_when(logFC >= logfc & -log10(adj.P.Val) >= -log10(sig) ~ "Up-regulated",
-                                       logFC <= -logfc & -log10(adj.P.Val) >= -log10(sig) ~ "Down-regulated",
+        expression <- dplyr::case_when(results.eb$logFC >= logfc & -log10(results.eb$adj.P.Val) >= -log10(sig) ~ "Up-regulated",
+                                       results.eb$logFC <= -logfc & -log10(results.eb$adj.P.Val) >= -log10(sig) ~ "Down-regulated",
                                        TRUE ~ "Unchanged")
       }
-      results.eb <- data.frame(logFC, p.value, adj.P.Val, expression)
-      results_rownames <- rownames(results.eb) #Obtenemos el nombre de las filas
-
-      # Extract Protein and Protein_description directly using vectorized operations
+      results.eb$expression <- expression
+      results_rownames <- rownames(results.eb)
       results.eb$Protein <- df[results_rownames, "Protein"]
       results.eb$Protein_description <- df[results_rownames, "Protein_description"]
+
+      row.names(results.eb) <- results.eb$Protein
+      results.eb <- results.eb[-c(2,3,6)]
+      results.eb <- results.eb[c(1,2,3,5,4,6)]
       #row.names(results.eb) <- make.unique(results.eb$Protein)
 
       if (way == 1){
         return(results.eb)
       } else if (way == 2){
         #Empezamos a trabajar con las unicas control
-        unique.control <- as.data.frame(unique_proteins[1])
+        unique.control <- as.data.frame(unique_proteins[[1]])
         fusioncontrol.df <- data.frame(matrix(ncol = 6))
         n <-  c("logFC", "p.value", "adj.P.Val", "expression", "Protein", "Protein_description")
         colnames(fusioncontrol.df) <- n
@@ -1838,7 +2029,7 @@ statistical_analysis <- function(df, test, paired = FALSE, metadata, logfc, sig,
         fusioncontrol.df <- fusioncontrol.df[-1,]
 
         #Empezamos a trabajar con la unicas tratamiento
-        unique.treatment <- as.data.frame(unique_proteins[2])
+        unique.treatment <- as.data.frame(unique_proteins[[2]])
         fusiontreatment.df <- data.frame(matrix(ncol = 6))
         n <-  c("logFC", "p.value", "adj.P.Val", "expression", "Protein", "Protein_description")
         colnames(fusiontreatment.df) <- n
@@ -1854,7 +2045,7 @@ statistical_analysis <- function(df, test, paired = FALSE, metadata, logfc, sig,
         row.names(unique.proteins.limma) <- unique.proteins.limma$Protein
 
 
-        unique.proteins.limma[c("logFC", "p.value", "adj.P.Val")] <- sapply(unique.proteins.limma[c("logFC", "p.value", "adj.P.Val")], as.numeric)
+        unique.proteins.limma[c("logFC", "p.value", "adj.P.Val")] <- lapply(unique.proteins.limma[c("logFC", "p.value", "adj.P.Val")], as.numeric)
 
         results.eb <- rbind(unique.proteins.limma, results.eb)
         #row.names(results.eb) <- make.unique(results.eb$Protein)
@@ -1888,6 +2079,11 @@ statistical_analysis <- function(df, test, paired = FALSE, metadata, logfc, sig,
       }
 
     } else if (paired == TRUE){
+      if (replicas_condicion1 != replicas_condicion2) {
+        stop("You selected 'paired = TRUE' but different sample number per group. ",
+             "Control: ", replicas_condicion1, " vs Treatment: ", replicas_condicion2,
+             ". For paired analysis their sample number must be identical.", call. = FALSE)
+      }
 
       for (i in seq_len(nrow(df))) {
         valuesA <- as.numeric(valuesA_cols[i, ])
@@ -1970,7 +2166,7 @@ statistical_analysis <- function(df, test, paired = FALSE, metadata, logfc, sig,
     return(results.eb)
   } else if (way == 2){
     #Empezamos a trabajar con las unicas control
-    unique.control <- as.data.frame(unique_proteins[1])
+    unique.control <- as.data.frame(unique_proteins[[1]])
     fusioncontrol.df <- data.frame(matrix(ncol = 6))
     n <-  c("logFC", "p.value", "adj.P.Val", "expression", "Protein", "Protein_description")
     colnames(fusioncontrol.df) <- n
@@ -1983,7 +2179,7 @@ statistical_analysis <- function(df, test, paired = FALSE, metadata, logfc, sig,
     fusioncontrol.df <- fusioncontrol.df[-1,]
 
     #Empezamos a trabajar con la unicas tratamiento
-    unique.treatment <- as.data.frame(unique_proteins[2])
+    unique.treatment <- as.data.frame(unique_proteins[[2]])
     fusiontreatment.df <- data.frame(matrix(ncol = 6))
     n <-  c("logFC", "p.value", "adj.P.Val", "expression", "Protein", "Protein_description")
     colnames(fusiontreatment.df) <- n
@@ -1998,7 +2194,7 @@ statistical_analysis <- function(df, test, paired = FALSE, metadata, logfc, sig,
     unique.proteins.limm <- rbind(fusioncontrol.df, fusiontreatment.df)
     row.names(unique.proteins.limm) <- unique.proteins.limm$Protein
 
-    unique.proteins.limm[c("logFC", "p.value", "adj.P.Val")] <- sapply(unique.proteins.limm[c("logFC", "p.value", "adj.P.Val")], as.numeric)
+    unique.proteins.limm[c("logFC", "p.value", "adj.P.Val")] <- lapply(unique.proteins.limm[c("logFC", "p.value", "adj.P.Val")], as.numeric)
 
     results.eb <- rbind(unique.proteins.limm, results.eb)
     #row.names(results.eb) <- make.unique(results.eb$Protein)
@@ -2079,18 +2275,19 @@ volcano_plot <- function(limma, title, label, statval, psms){
 
   logFC <- limma$logFC
   protein_ids <- limma$Protein
+  mis_colores <- c("Down-regulated" = "green3", "Unchanged" = "gray78", "Up-regulated" = "firebrick3")
 
   if (statval == 1){
 
     if (psms == TRUE){
       plot <- plotly::plot_ly(data = limma, x = ~logFC, y = ~-log10(sca.P.Value), text = protein_ids,
                               type = "scatter", mode = "markers",
-                              color = ~expression, colors = c("green3", "gray78", "firebrick3"),
+                              color = ~expression, colors = mis_colores,
                               size = I(label))
     } else if( psms == FALSE){
       plot <- plotly::plot_ly(data = limma, x = ~logFC, y = ~-log10(p.value), text = protein_ids,
                               type = "scatter", mode = "markers",
-                              color = ~expression, colors = c("green3", "gray78", "firebrick3"),
+                              color = ~expression, colors = mis_colores,
                               size = I(label))
     }
     plot <- plotly::layout(plot, title = title,
@@ -2106,22 +2303,21 @@ volcano_plot <- function(limma, title, label, statval, psms){
     if (psms == TRUE){
       plot <- plotly::plot_ly(data = limma, x = ~logFC, y = ~-log10(sca.adj.pval), text = protein_ids,
                               type = "scatter", mode = "markers",
-                              color = ~expression, colors = c("green3", "gray78", "firebrick3"),
+                              color = ~expression, colors = mis_colores,
                               size = I(label))
     } else if( psms == FALSE){
       plot <- plotly::plot_ly(data = limma, x = ~logFC, y = ~-log10(adj.P.Val), text = protein_ids,
                               type = "scatter", mode = "markers",
-                              color = ~expression, colors = c("green3", "gray78", "firebrick3"),
+                              color = ~expression, colors = mis_colores,
                               size = I(label))
     }
     plot <- plotly::layout(plot, title = title,
                            xaxis = list(title = list(text ='Log2 Fold Change')),
-                           yaxis = list(title = list(text = 'Log10 p-value')))
+                           yaxis = list(title = list(text = 'Log10 q-value')))
 
     return(plot)
   }
 }
-
 
 #'
 #' Create a Static Volcano Plot for Publication
@@ -2336,7 +2532,7 @@ pca <- function(x, metadata, selected_conditions, pc_x = 1, pc_y = 2) {
 
   # Check if selected PCs exist
   if (pc_x > length(eigenValues) || pc_y > length(eigenValues)) {
-    stop("Selected principal component index is out of bounds.")
+    stop("Selected principal component index is out of bounds.", call. = FALSE)
   }
 
   # Calculate contribution for the *selected* PCs
@@ -2536,12 +2732,13 @@ my_heatmap <- function(data, cond.names, title){
 #' # Generate the plot
 #' my_heatmap_differential(limma_results, data_expr, sample_names, "DE Heatmap")
 #'
-my_heatmap_differential <- function(limma, data, cond.names, title) {
 
+my_heatmap_differential <- function(limma, data, cond.names, title) {
   top_proteins <- dplyr::bind_rows(
     limma %>% dplyr::filter(expression == 'Up-regulated'),
     limma %>% dplyr::filter(expression == 'Down-regulated')
-  )
+  ) %>%
+    dplyr::arrange(desc(logFC))
 
   if (nrow(top_proteins) == 0) {
     return(ggplot2::ggplot() +
@@ -2549,35 +2746,62 @@ my_heatmap_differential <- function(limma, data, cond.names, title) {
              ggplot2::theme_void())
   }
 
+  ordered_samples <- cond.names[cond.names %in% cond.names]
+
   heatmap_data_long <- data %>%
     dplyr::filter(Protein %in% top_proteins$Protein) %>%
+    dplyr::select(Protein, dplyr::all_of(cond.names)) %>% # Aseguramos seleccionar solo columnas válidas
     tidyr::pivot_longer(
       cols = dplyr::all_of(cond.names),
       names_to = "Sample",
       values_to = "Intensity"
     ) %>%
     dplyr::mutate(Intensity = as.numeric(Intensity))
-
   heatmap_data_long <- heatmap_data_long %>%
     dplyr::group_by(Protein) %>%
-    dplyr::mutate(Intensity_scaled = scale(Intensity)) %>% # scale is base R
+    dplyr::mutate(Intensity_scaled = as.numeric(scale(Intensity))) %>%
     dplyr::ungroup()
 
+  heatmap_data_long$Sample <- factor(heatmap_data_long$Sample, levels = ordered_samples)
+
+  heatmap_data_long$Protein <- factor(heatmap_data_long$Protein, levels = rev(top_proteins$Protein))
+
+  num_prots <- length(unique(heatmap_data_long$Protein))
+
+  if (num_prots > 100) {
+    line_size <- 0
+    show_y_labels <- FALSE
+  } else {
+    line_size <- 0.1
+    show_y_labels <- TRUE
+    y_font_size <- if(num_prots < 20) 10 else if(num_prots < 50) 7 else 5
+  }
+
   heatmap_object <- ggplot2::ggplot(heatmap_data_long, ggplot2::aes(x = Sample, y = Protein, fill = Intensity_scaled)) +
-    ggplot2::geom_tile(color = "white") +
+    ggplot2::geom_tile(color = if(line_size > 0) "white" else NA, size = line_size) +
 
     ggplot2::scale_fill_gradient2(
       low = "green",
       mid = "black",
       high = "red",
-      midpoint = 0, # Assumes scaled data is centered around 0
-      name = "Scaled Intensity"
+      midpoint = 0,
+      name = "Z-Score" # Corrección conceptual: Fold-Change es un número fijo, Z-Score varía por muestra
     ) +
-    ggplot2::labs(title = title, x = "Samples", y = "Proteins") +
-    ggplot2::theme_minimal() + # A clean theme for heatmaps
+    ggplot2::labs(
+      title = title,
+      subtitle = paste("Total significant proteins:", num_prots),
+      x = "Samples",
+      y = if(show_y_labels) "Proteins" else ""
+    ) +
+    ggplot2::theme_minimal() +
     ggplot2::theme(
       axis.text.x = ggplot2::element_text(angle = 45, vjust = 1, hjust = 1),
-      plot.title = ggplot2::element_text(hjust = 0.5, face = "bold")
+      plot.title = ggplot2::element_text(hjust = 0.5, face = "bold"),
+
+      axis.text.y = if(show_y_labels) ggplot2::element_text(size = y_font_size) else ggplot2::element_blank(),
+      axis.ticks.y = if(show_y_labels) ggplot2::element_line() else ggplot2::element_blank(),
+
+      panel.grid = ggplot2::element_blank()
     )
 
   return(heatmap_object)
@@ -2632,7 +2856,7 @@ Diferential_boxplot <- function(df, metadata, protein, LOG2.names, selected_cond
   subset_data <- df[df$Protein == protein, c(LOG2.names)]
 
   if (nrow(subset_data) == 0) {
-    stop(paste("Protein", protein, "not found in df$Protein"))
+    stop(sprintf("Protein '%s' not found in df$Protein", protein))
   }
 
   first_group <- unique(metadata$group)[unique(metadata$group) == selected_conditions[2]]
@@ -2856,37 +3080,6 @@ dotplot_func <- function(terms, ...){
 
 }
 
-
-#' @title Create g:Profiler Plot
-#' @description Generates a publication-ready plot from a `gost` result object.
-#'
-#' @param terms A list, where the third element (`terms[[3]]`) is a
-#'              `gost` result object.
-#' @param ... Additional arguments passed to `gprofiler2::gostplot`.
-#'
-#' @return A ggplot object.
-#' @export
-#' @importFrom gprofiler2 gostplot
-#'
-#' @examples
-#' # This example requires a valid gost object, which needs an internet connection
-#' # See the example for Goterms_finder
-#' \donttest{
-#' if (requireNamespace("gprofiler2")) {
-#'   # Example of how it would be called, but depends on Goterms_finder
-#'   # go_res <- Goterms_finder(...)
-#'   # if (!is.null(go_res)) {
-#'   #   gostplot_func(go_res)
-#'   # }
-#'   print("This plot depends on a live query from Goterms_finder.")
-#' }
-#' }
-#'
-gostplot_func <- function(terms, ...){
-  gprofiler2::gostplot(terms[[3]], ...)
-
-}
-
 #' @title Create Bar Plot from Enrichment Results
 #' @description Generates a bar plot from an `enrichResult` object,
 #' faceted by cluster.
@@ -2900,7 +3093,7 @@ gostplot_func <- function(terms, ...){
 #' @return A ggplot object.
 #' @export
 #' @importFrom ggplot2 facet_grid ylab ggtitle
-#' @importFrom methods new
+#' @importFrom methods new slot "slot<-"
 #'
 #' @examples
 #' # This example requires a valid enrichResult object.
@@ -2928,8 +3121,14 @@ barplot_func <- function(terms, number, conditions, ...){
   res_df <- slot(obj_to_plot, "result")
   res_df <- res_df[order(res_df$Count, decreasing = TRUE), ]
 
-  up_regulated_subset <- res_df[res_df$Conditions == "Up-regulated", ][1:number, ]
-  down_regulated_subset <- res_df[res_df$Conditions == "Down-regulated", ][1:number, ]
+
+  up_df <- res_df[res_df$Conditions == "Up-regulated", ]
+  n_up <- min(number, nrow(up_df))
+  up_regulated_subset <- up_df[seq_len(n_up), , drop = FALSE]
+
+  down_df <- res_df[res_df$Conditions == "Down-regulated", ]
+  n_down <- min(number, nrow(down_df))
+  down_regulated_subset <- down_df[seq_len(n_down), , drop = FALSE]
 
   res_df_final <- rbind(up_regulated_subset, down_regulated_subset)
 
@@ -2988,7 +3187,10 @@ interactions_up <- function(df, taxonid, score){
   down_mapped <- string_db$map(down_regulated, "Protein", removeUnmappedRows = TRUE)
 
   par(mfrow=c(1,1)) # par is base R
-  hits_up <- up_mapped$STRING_id[1:100]
+
+  n_up_mapped <- min(100, length(up_mapped$STRING_id))
+  hits_up <- down_mapped$STRING_id[seq_len(n_up_mapped)]
+
   string_db$plot_network(hits_up)
 
   interactions <- list(up_mapped, down_mapped)
@@ -3035,7 +3237,10 @@ interactions_down <- function(df, taxonid, score){
   down_mapped <- string_db$map(down_regulated, "Protein", removeUnmappedRows = TRUE)
 
   par(mfrow=c(1,1)) # par is base R
-  hits_down <- down_mapped$STRING_id[1:100]
+
+  n_down_mapped <- min(100, length(down_mapped$STRING_id))
+  hits_down <- down_mapped$STRING_id[seq_len(n_down_mapped)]
+
   string_db$plot_network(hits_down)
 
 
@@ -3088,8 +3293,17 @@ igraph_analysis <- function(interactions, taxonid, score) {
   hits_upregulated <- interactions[[1]]
   hits_downregulated <- interactions[[2]]
 
-  subgraph_up_proteins <- string_db$get_subnetwork(hits_upregulated$STRING_id[1:100])
-  subgraph_down_proteins <- string_db$get_subnetwork(hits_downregulated$STRING_id[1:100])
+  n_up <- min(100, length(hits_upregulated$STRING_id))
+  subgraph_up_proteins <- string_db$get_subnetwork(
+    hits_upregulated$STRING_id[seq_len(n_up)]
+  )
+  #subgraph_up_proteins <- string_db$get_subnetwork(hits_upregulated$STRING_id[1:100])
+
+  n_down <- min(100, length(hits_downregulated$STRING_id))
+  subgraph_down_proteins <- string_db$get_subnetwork(
+    hits_downregulated$STRING_id[seq_len(n_down)]
+  )
+  #subgraph_down_proteins <- string_db$get_subnetwork(hits_downregulated$STRING_id[1:100])
 
   graph_analysis_up <- calculate_graph_measures(subgraph_up_proteins, hits_upregulated)
   graph_analysis_down <- calculate_graph_measures(subgraph_down_proteins, hits_downregulated)
@@ -3106,20 +3320,24 @@ calculate_graph_measures <- function(subgraph, hits) {
   )
 
   degree_values <- igraph::degree(subgraph)
-  top_deg_index <- order(degree_values, decreasing = TRUE)[1:10]
+  n_top <- min(10, length(degree_values))
+  top_deg_index <- order(degree_values, decreasing = TRUE)[seq_len(n_top)]
   top_deg_proteins <- hits$Protein[hits$STRING_id %in% igraph::V(subgraph)$name[top_deg_index]]
 
   betweenness_values <- igraph::betweenness(subgraph, directed = TRUE, weights = NA)
-  top_betweenness_index <- order(betweenness_values, decreasing = TRUE)[1:10]
+  n_top <- min(10, length(betweenness_values))
+  top_betweenness_index <- order(betweenness_values, decreasing = TRUE)[seq_len(n_top)]
   top_betweenness_proteins <- hits$Protein[hits$STRING_id %in% igraph::V(subgraph)$name[top_betweenness_index]]
 
   eigen_values <- igraph::eigen_centrality(subgraph, directed = TRUE, weights = NA)$vector
-  top_eigen_index <- order(eigen_values, decreasing = TRUE)[1:10]
+  n_top <- min(10, length(eigen_values))
+  top_eigen_index <- order(eigen_values, decreasing = TRUE)[seq_len(n_top)]
   top_eigen_proteins <- hits$Protein[hits$STRING_id %in% igraph::V(subgraph)$name[top_eigen_index]]
 
   closeness_values <- igraph::closeness(subgraph, mode = "all")
   closeness_values[is.infinite(closeness_values)] <- 0
-  top_closeness_index <- order(closeness_values, decreasing = TRUE)[1:10]
+  n_top <- min(10, length(closeness_values))
+  top_closeness_index <- order(closeness_values, decreasing = TRUE)[seq_len(n_top)]
   top_closeness_proteins <- hits$Protein[hits$STRING_id %in% igraph::V(subgraph)$name[top_closeness_index]]
 
   graph_analysis <- data.frame(
@@ -3131,4 +3349,162 @@ calculate_graph_measures <- function(subgraph, hits) {
   )
 
   return(graph_analysis)
+}
+
+#' @title Export TraianProt results to SummarizedExperiment
+#' @description Compiles the raw, normalized, and statistical results from 
+#' the TraianProt pipeline into a Bioconductor-standard SummarizedExperiment object.
+#' @export
+#' @importFrom SummarizedExperiment SummarizedExperiment
+#'
+#' @examples
+#' df_raw <- data.frame(
+#'   Protein = paste0("Protein_", 1:5),
+#'   WT_1 = runif(5, 100, 1000), WT_2 = runif(5, 100, 1000),
+#'   Treat_1 = runif(5, 100, 1000), Treat_2 = runif(5, 100, 1000)
+#' )
+#' 
+#' df_norm <- df_raw
+#' df_norm[, 2:5] <- log2(df_norm[, 2:5]) # Simulamos la normalización
+#' 
+#' meta <- data.frame(
+#'   Condition = c("WT", "WT", "Treatment", "Treatment"),
+#'   log2_col = c("WT_1", "WT_2", "Treat_1", "Treat_2")
+#' )
+#' 
+#' stats <- data.frame(
+#'   Protein = paste0("Protein_", 1:5),
+#'   logFC = c(1.2, -0.5, 2.1, 0.1, -1.8),
+#'   p_value = c(0.01, 0.4, 0.005, 0.8, 0.02)
+#' )
+#' 
+#' se_object <- traian_to_SE(df_raw, df_norm, meta, stats)
+#' se_object
+#'
+traian_to_SE <- function(df.F, total_dataset, metadata, df_limma) {
+  
+  # We find the common proteins
+  common_prots <- intersect(df.F$Protein, total_dataset$Protein)
+  common_prots <- intersect(common_prots, limma$Protein)
+  
+  # Filter the dataframes to obtain the same amount of proteins
+  df.F <- df.F[match(common_prots, df.F$Protein), ]
+  total_dataset <- total_dataset[match(common_prots, total_dataset$Protein), ]
+  limma <- limma[match(common_prots, limma$Protein), ]
+  
+  rownames(metadata) <- metadata$log2_col
+  
+  mat_raw <- as.matrix(df.F[metadata$log2_col])
+  mat_norm <- as.matrix(total_dataset[metadata$log2_col])
+  
+  rownames(mat_raw) <- common_prots
+  rownames(mat_norm) <- common_prots
+  rownames(limma) <- common_prots
+  
+  # Object creation
+  assays_list <- list(
+    raw = mat_raw,
+    normalized = mat_norm
+  )
+  
+  se <- SummarizedExperiment::SummarizedExperiment(
+    assays = assays_list,
+    colData = metadata,
+    rowData = limma
+  )
+  
+  return(se)
+}
+
+
+#' @title Collapse Technical Replicates in Proteomics Data
+#'
+#' @description This function identifies technical replicates based on a biological 
+#'    replicate metadata column and collapses them by calculating the mean intensity. 
+#'    It updates both the expression data and the associated metadata.
+#'
+#' @details The function assumes that technical replicates share the same 
+#'    `sample_name` ID in the metadata. It cleans the column names by removing 
+#'    trailing numeric indices (e.g., "Sample, 1" becomes "Sample") using regex.
+#'    If only one technical replicate exists for a biological group, it simply 
+#'    renames the column.
+#'
+#' @param df A `data.frame` or `matrix` where rows are proteins/features and 
+#'    columns are samples (intensities).
+#' @param metadata A `data.frame` containing at least two columns: 
+#'    `log2_col` (matching colnames in `df`) and `bioreplicate` (grouping ID).
+#'
+#' @return A `list` with two elements:
+#' \itemize{
+#'   \item \code{data}: A `data.frame` with collapsed biological replicates as columns.
+#'   \item \code{metadata}: A `data.frame` with one row per biological replicate, 
+#'   updated to match the new column names.
+#' }
+#'
+#' @importFrom stats rowMeans
+#' @export
+#'
+#' @examples
+#' # Example metadata
+#' meta <- data.frame(
+#'   log2_col = c("S1, 1", "S1, 2", "S2, 1"),
+#'   bioreplicate = c("Bio1", "Bio1", "Bio2"),
+#'   intensity_sample_name = c("S1, 1", "S1, 2", "S2, 1"),
+#'   stringsAsFactors = FALSE
+#' )
+#' # Example data
+#' dat <- data.frame(
+#'   `S1, 1` = c(1, 2), `S1, 2` = c(1.2, 2.2), `S2, 1` = c(5, 6),
+#'   check.names = FALSE
+#' )
+#' result <- collapse_technical_replicates(dat, meta)
+
+collapse_technical_replicates <- function(df, metadata) {
+  # 1. Identificar las réplicas biológicas únicas (Bio1, Bio2, etc.)
+  
+  if (!all(c("log2_col", "sample_name") %in% colnames(metadata))) {
+    stop("Metadata must contain 'log2_col' and 'sample_name' columns.")
+  }
+  
+  unique_bio_reps <- unique(metadata$sample_name)
+  cols_to_collapse <- metadata$log2_col
+  df_collapsed <- df[, !(colnames(df) %in% cols_to_collapse), drop = FALSE]
+  
+  new_metadata_rows <- list()
+  
+  for (bio_rep in unique_bio_reps) {
+    
+    sub_meta <- metadata[metadata$sample_name == bio_rep, ]
+    tech_cols <- sub_meta$log2_col
+    
+    first_name <- tech_cols[1]
+    new_col_name <- gsub(", [0-9]+$", "", first_name) # Very specific
+    
+    if (length(tech_cols) > 1) {
+      
+      
+      mat_tech <- as.matrix(df[, tech_cols, drop = FALSE])
+      mat_tech[!is.finite(mat_tech)] <- NA
+      res <- rowMeans(mat_tech, na.rm = TRUE)
+      res[is.nan(res)] <- -Inf
+      df_collapsed[[new_col_name]] <- res
+      
+    } else {
+      
+      df_collapsed[[new_col_name]] <- df[[tech_cols]]
+    }
+    
+    
+    new_row <- sub_meta[1, ]
+    new_row$log2_col <- new_col_name
+    new_row$intensity_sample_name <- new_col_name 
+    new_metadata_rows[[bio_rep]] <- new_row
+  }
+  
+  updated_metadata <- do.call(rbind, new_metadata_rows)
+  
+  return(list(
+    data = df_collapsed,      
+    metadata = updated_metadata   
+  ))
 }

@@ -22,22 +22,23 @@ faceted by condition.
 \examples{
 
 if (requireNamespace("clusterProfiler", quietly = TRUE)) {
-   dummy_data <- data.frame(
-     Cluster = "Up-regulated",
-     Category = "BP",
-     ID = "GO:0006915",
-     Description = "apoptosis",
-     p.value = 0.01,
-     p.adjust = 0.01,
-     Count = 5,
-     GeneRatio = "5/50",
-     BgRatio = "100/10000",
-     Conditions = "Up-regulated"
-   )
+    dummy_data <- data.frame(
+        Cluster = "Up-regulated",
+        Category = "BP",
+        ID = "GO:0006915",
+        Description = "apoptosis",
+        p.value = 0.01,
+        p.adjust = 0.01,
+        Count = 5,
+        GeneRatio = "5/50",
+        BgRatio = "100/10000",
+        Conditions = "Up-regulated"
+    )
 
-   dummy_cc_result <- methods::new("compareClusterResult",
-                                  compareClusterResult = dummy_data)
-   dotplot_func(list(dummy_cc_result))
+    dummy_cc_result <- methods::new("compareClusterResult",
+        compareClusterResult = dummy_data
+    )
+    dotplot_func(list(dummy_cc_result))
 }
 
 }

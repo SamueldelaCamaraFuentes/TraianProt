@@ -35,5 +35,4 @@ log_data[sample(1:100, 10)] <- NA # Add some NAs
 cv_data <- plotCV2(log_data, main = "CV vs. Mean Plot")
 print(head(cv_data))
 
-
 }

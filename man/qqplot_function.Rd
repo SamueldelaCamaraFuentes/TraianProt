@@ -24,8 +24,8 @@ columns in a data frame.
 }
 \examples{
 my_data <- data.frame(
-  Theoretical = rnorm(100),
-  Sample = rnorm(100, mean = 0.5)
+    Theoretical = rnorm(100),
+    Sample = rnorm(100, mean = 0.5)
 )
 qqplot_function(my_data, "Theoretical", "Sample", "blue")
 

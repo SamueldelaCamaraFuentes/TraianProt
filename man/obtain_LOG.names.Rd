@@ -18,11 +18,11 @@ A helper function to find all column names containing "LOG2".
 \examples{
 # Create a small example data frame
 my_df <- data.frame(
-  Protein = c("P1", "P2"),
-  Intensity.A = c(100, 200),
-  LOG2.A = c(6.6, 7.6),
-  Intensity.B = c(110, 210),
-  LOG2.B = c(6.7, 7.7)
+    Protein = c("P1", "P2"),
+    Intensity.A = c(100, 200),
+    LOG2.A = c(6.6, 7.6),
+    Intensity.B = c(110, 210),
+    LOG2.B = c(6.7, 7.7)
 )
 
 # This example is runnable!
