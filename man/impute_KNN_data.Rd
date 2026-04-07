@@ -37,7 +37,7 @@ log_matrix_na <- matrix(
 LOG2.names <- c("Sample1", "Sample2")
 
 imputed_matrix <- impute_KNN_data(as.data.frame(log_matrix_na), LOG2.names)
-}
-print(imputed_matrix)
 
+print(imputed_matrix)
+}
 }

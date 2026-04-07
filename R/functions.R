@@ -1109,10 +1109,10 @@ impute_data <- function(df, LOG2.names, width = 0.3, downshift = 1.8) {
 #' LOG2.names <- c("Sample1", "Sample2")
 #'
 #' imputed_matrix <- impute_KNN_data(as.data.frame(log_matrix_na), LOG2.names)
-#' }
+#'
 
 #' print(imputed_matrix)
-#'
+#'}
 
 impute_KNN_data <- function(df, LOG2.names, ...) {
     impute.names <- sub("LOG2", "impute", LOG2.names)
