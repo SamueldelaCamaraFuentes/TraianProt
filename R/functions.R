@@ -3223,29 +3223,6 @@ calculate_graph_measures <- function(subgraph, hits) {
     return(graph_analysis)
 }
 
-#' @title Launch the TraianProt Shiny Application
-#' @description This function launches the TraianProt interactive Shiny application.
-#' It provides a user-friendly graphical interface to run the proteomics
-#' downstreaming analysis workflow.
-#'
-#' @return Opens the TraianProt Shiny app in the default web browser.
-#' @export
-#' @importFrom shiny runApp
-#'
-#' @examples
-#' \dontrun{
-#'
-#' runTraianProt()
-#' }
-runTraianProt <- function() {
-    appDir <- system.file("shiny", "TraianProtApp", package = "TraianProt")
-
-    if (appDir == "") {
-        stop("Could not find shiny directory. Try re-installing `TraianProt`.", call. = FALSE)
-    }
-
-    shiny::runApp(appDir, display.mode = "normal")
-}
 
 #' @title Export TraianProt results to SummarizedExperiment
 #' @description Compiles the raw, normalized, and statistical results from
