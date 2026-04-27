@@ -609,7 +609,7 @@ runTraianProt <- function() {
 
                            box(
                              title = "Note", width = 12, status = "warning", solidHeader = TRUE,
-                             helpText("💡 Tip: For FragPipe and Proteome Discoverer datasets,
+                             helpText("Tip: For FragPipe and Proteome Discoverer datasets,
                                       use the Unique Peptides Extractor (see sidebar) to pre-process
                                       your data before continuing.")
                            ),
@@ -801,7 +801,7 @@ runTraianProt <- function() {
            width = "60%",
            height = 1000)
 
-    }, deleteFile = F)
+    }, deleteFile = FALSE)
 
     #Download Tutorial
 
@@ -1098,20 +1098,20 @@ runTraianProt <- function() {
 
           DT::datatable(data(), options = list(pageLength = 5,
                                            lengthMenu = c(5, 10, 15, 20),
-                                           scrollX = T,
+                                           scrollX = TRUE,
                                            autoWidth = TRUE ))
         } else if (input$displayproteins == 2){
 
           DT::datatable(unique_control(), options = list(pageLength = 5,
                                                      lengthMenu = c(5, 10, 15, 20),
-                                                     scrollX = T,
+                                                     scrollX = TRUE,
                                                      autoWidth = TRUE ))
 
         } else if (input$displayproteins == 3){
 
           DT::datatable(unique_treatment(), options = list(pageLength = 5,
                                                        lengthMenu = c(5, 10, 15, 20),
-                                                       scrollX = T,
+                                                       scrollX = TRUE,
                                                        autoWidth = TRUE ))
         }
 
@@ -1416,7 +1416,7 @@ runTraianProt <- function() {
 
       DT::datatable(difexpression(), options = list(pageLength = 15,
                                                 lengthMenu = c(5, 10, 15, 20),
-                                                scrollX = T,
+                                                scrollX = TRUE,
                                                 autoWidth = TRUE ))
 
 
@@ -1514,7 +1514,7 @@ runTraianProt <- function() {
           grDevices::dev.off()
         } else if (input$difextension == "jpeg"){
           grDevices::jpeg(file, width = 12, height = 10, units = "in", res = 400)
-          grDevices::my_heatmap(data(), LOG2.names(), input$heatmaptitle)
+          my_heatmap(data(), LOG2.names(), input$heatmaptitle)
           dev.off()
         } else if (input$difextension == "png"){
           grDevices::png(file, width = 12, height = 10, units = "in", res = 400)
@@ -1601,7 +1601,7 @@ runTraianProt <- function() {
 
       DT::datatable(funcanalysis()[[2]]@result, options = list(pageLength = 10,
                                                            lengthMenu = c(5, 10, 15, 20),
-                                                           scrollX = T,
+                                                           scrollX = TRUE,
                                                            autoWidth = TRUE ))
     })
 
@@ -1770,7 +1770,7 @@ runTraianProt <- function() {
 
       datatable(graph()[[1]], options = list(pageLength = 1,
                                              lengthMenu = c(1),
-                                             scrollX = T,
+                                             scrollX = TRUE,
                                              autoWidth = TRUE ))
 
     })
@@ -1779,7 +1779,7 @@ runTraianProt <- function() {
 
       datatable(graph()[[2]], options = list(pageLength = 1,
                                              lengthMenu = c(1),
-                                             scrollX = T,
+                                             scrollX = TRUE,
                                              autoWidth = TRUE ))
 
     })
