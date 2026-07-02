@@ -25,7 +25,7 @@ Maps up-regulated proteins to the STRING database, plots the
 network, and returns a list of mapped proteins.
 }
 \examples{
-\dontrun{
+\donttest{
 if (requireNamespace("STRINGdb")) {
     # Create synthetic data
     limma_df <- data.frame(

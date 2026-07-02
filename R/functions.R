@@ -124,7 +124,8 @@ quick_filtering <- function(raw, platform, organism, metadata, selected_conditio
             new_names <- c(new_names, new)
         }
 
-        colnames(df)[length(colnames(df)) - (length(intensity_columns) - 1):length(colnames(intensity_columns))] <- new_names
+        #colnames(df)[length(colnames(df)) - (length(intensity_columns) - 1):length(colnames(intensity_columns))] <- new_names
+        colnames(df)[length(colnames(df)) - seq(from = length(intensity_columns) - 1, to = length(colnames(intensity_columns)))] <- new_names
         intensity_names <- grep("\\.(d|raw)$", colnames(df), value = TRUE)
         df[intensity_names] <- lapply(df[intensity_names], as.numeric)
         LOG2.names <- sub("\\.(d|raw)$", ".LOG2", intensity_names)
@@ -227,9 +228,11 @@ quick_filtering <- function(raw, platform, organism, metadata, selected_conditio
         merged_peptide_counts <- standardize_columns(merged_peptide_counts, LOG2.names)
 
 
-        colnames(merged_unique_peptide_counts)[2:(length(LOG2.names) + 1)] <- paste("Unique peptides", colnames(merged_unique_peptide_counts)[2:(length(LOG2.names) + 1)], sep = " ")
+        #colnames(merged_unique_peptide_counts)[2:(length(LOG2.names) + 1)] <- paste("Unique peptides", colnames(merged_unique_peptide_counts)[2:(length(LOG2.names) + 1)], sep = " ")
+        colnames(merged_unique_peptide_counts)[seq(from = 2, to = length(LOG2.names) + 1)] <- paste("Unique peptides", colnames(merged_unique_peptide_counts)[2:(length(LOG2.names) + 1)], sep = " ")
         colnames(merged_unique_peptide_counts)[1] <- "Protein"
-        colnames(merged_peptide_counts)[2:(length(LOG2.names) + 1)] <- paste("Peptides", colnames(merged_peptide_counts)[2:(length(LOG2.names) + 1)], sep = " ")
+        #colnames(merged_peptide_counts)[2:(length(LOG2.names) + 1)] <- paste("Peptides", colnames(merged_peptide_counts)[2:(length(LOG2.names) + 1)], sep = " ")
+        colnames(merged_peptide_counts)[seq(from = 2, to = length(LOG2.names) + 1)] <- paste("Peptides", colnames(merged_peptide_counts)[2:(length(LOG2.names) + 1)], sep = " ")
         colnames(merged_peptide_counts)[1] <- "Protein"
 
         merged_df <- merge(df, merged_unique_peptide_counts, by = "Protein", all = FALSE)
@@ -517,9 +520,9 @@ identify_proteins <- function(raw, metadata, platform, selected_conditions) {
         ggplot2::geom_bar(stat = "identity", color = "black") +
         ggplot2::scale_fill_manual(values = c("light green", "light blue")) +
         ggplot2::labs(
-            title = "Proteinas Cuantificadas",
-            x = "Muestras",
-            y = "Total de Proteinas"
+            title = "Proteins Quantified",
+            x = "Samples",
+            y = "Total amount of proteins"
         ) +
         ggplot2::theme_classic() +
         ggplot2::theme(
@@ -993,7 +996,7 @@ median_centering <- function(df, LOG2.names) {
 #'
 normalization_func <- function(df, LOG2.names, method) {
     if (method == "trimMean") {
-        df[, LOG2.names] <- wrMisc::normalizeThis(dat = df[, LOG2.names], method = method, trimFa = 0.4)
+        df[, LOG2.names] <- wrMisc::normalizeThis(dat = df[, LOG2.names], method = method, trimFa = NULL)
     } else if (method != "trimMean") {
         df[, LOG2.names] <- wrMisc::normalizeThis(dat = df[, LOG2.names], method = method)
     }
@@ -3038,7 +3041,7 @@ barplot_func <- function(terms, number, conditions, ...) {
 #' @importFrom methods new
 #'
 #' @examples
-#' \dontrun{
+#' \donttest{
 #' if (requireNamespace("STRINGdb")) {
 #'     # Create synthetic data
 #'     limma_df <- data.frame(
@@ -3064,7 +3067,7 @@ interactions_up <- function(df, taxonid, score) {
     par(mfrow = c(1, 1)) # par is base R
 
     n_up_mapped <- min(100, length(up_mapped$STRING_id))
-    hits_up <- down_mapped$STRING_id[seq_len(n_up_mapped)]
+    hits_up <- up_mapped$STRING_id[seq_len(n_up_mapped)]
 
     string_db$plot_network(hits_up)
 

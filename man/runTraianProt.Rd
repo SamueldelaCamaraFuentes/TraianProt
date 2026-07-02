@@ -16,6 +16,6 @@ This function builds and returns the Shiny app object for TraianProt.
 app <- runTraianProt()
 
 if (interactive()) {
-  shiny::runApp(app)
+    shiny::runApp(app)
 }
 }
