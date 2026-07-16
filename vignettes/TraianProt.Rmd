@@ -91,10 +91,10 @@ The primary and most user-friendly way to interact with TraianProt is through it
 To start the graphical interface, simply run the following command in your R console:
 
 ```{r run-app, eval=FALSE}
-# Generamos la estructura de la aplicación
+# Application structure
 app <- runTraianProt()
 
-# La ejecutamos si estamos en una sesión interactiva
+# Execution whether it is an interactive session
 if (interactive()) {
     shiny::runApp(app)
 }
