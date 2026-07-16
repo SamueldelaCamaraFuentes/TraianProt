@@ -124,7 +124,7 @@ quick_filtering <- function(raw, platform, organism, metadata, selected_conditio
             new_names <- c(new_names, new)
         }
 
-        #colnames(df)[length(colnames(df)) - (length(intensity_columns) - 1):length(colnames(intensity_columns))] <- new_names
+        # colnames(df)[length(colnames(df)) - (length(intensity_columns) - 1):length(colnames(intensity_columns))] <- new_names
         colnames(df)[length(colnames(df)) - seq(from = length(intensity_columns) - 1, to = length(colnames(intensity_columns)))] <- new_names
         intensity_names <- grep("\\.(d|raw)$", colnames(df), value = TRUE)
         df[intensity_names] <- lapply(df[intensity_names], as.numeric)
@@ -228,10 +228,10 @@ quick_filtering <- function(raw, platform, organism, metadata, selected_conditio
         merged_peptide_counts <- standardize_columns(merged_peptide_counts, LOG2.names)
 
 
-        #colnames(merged_unique_peptide_counts)[2:(length(LOG2.names) + 1)] <- paste("Unique peptides", colnames(merged_unique_peptide_counts)[2:(length(LOG2.names) + 1)], sep = " ")
+        # colnames(merged_unique_peptide_counts)[2:(length(LOG2.names) + 1)] <- paste("Unique peptides", colnames(merged_unique_peptide_counts)[2:(length(LOG2.names) + 1)], sep = " ")
         colnames(merged_unique_peptide_counts)[seq(from = 2, to = length(LOG2.names) + 1)] <- paste("Unique peptides", colnames(merged_unique_peptide_counts)[2:(length(LOG2.names) + 1)], sep = " ")
         colnames(merged_unique_peptide_counts)[1] <- "Protein"
-        #colnames(merged_peptide_counts)[2:(length(LOG2.names) + 1)] <- paste("Peptides", colnames(merged_peptide_counts)[2:(length(LOG2.names) + 1)], sep = " ")
+        # colnames(merged_peptide_counts)[2:(length(LOG2.names) + 1)] <- paste("Peptides", colnames(merged_peptide_counts)[2:(length(LOG2.names) + 1)], sep = " ")
         colnames(merged_peptide_counts)[seq(from = 2, to = length(LOG2.names) + 1)] <- paste("Peptides", colnames(merged_peptide_counts)[2:(length(LOG2.names) + 1)], sep = " ")
         colnames(merged_peptide_counts)[1] <- "Protein"
 
@@ -558,9 +558,15 @@ identify_proteins <- function(raw, metadata, platform, selected_conditions) {
 #'     ID = letters[1:10],
 #'     R1 = rnorm(10), R2 = rnorm(10), R3 = rnorm(10)
 #' )
-#' plot <- traianprot_power_curve(data, c("R1", "R2", "R3"), foldchange = 2, replicatespower = 5, alpha_level_choice = 1, alpha_level = 0.05)
+#' plot <- traianprot_power_curve(
+#'     data, c("R1", "R2", "R3"),
+#'     foldchange = 2,
+#'     replicatespower = 5,
+#'     alpha_level_choice = 1,
+#'     alpha_level = 0.05
+#' )
 #' print(plot)
-traianprot_power_curve <- function(df, log2_cols, foldchange, replicatespower,alpha_level_choice, alpha_level) {
+traianprot_power_curve <- function(df, log2_cols, foldchange, replicatespower, alpha_level_choice, alpha_level) {
     if (!is.data.frame(df) && !is.matrix(df)) {
         stop("El argumento 'df' debe ser un data.frame o una matriz.", call. = FALSE)
     }
@@ -1094,7 +1100,6 @@ impute_data <- function(df, LOG2.names, width = 0.3, downshift = 1.8) {
 #' @return A numeric matrix with NA values imputed.
 #' @importFrom VIM kNN
 #' @export
-#'
 #' @examples
 #' \donttest{
 #' log_matrix_na <- matrix(
@@ -1113,9 +1118,8 @@ impute_data <- function(df, LOG2.names, width = 0.3, downshift = 1.8) {
 #'
 #' imputed_matrix <- impute_KNN_data(as.data.frame(log_matrix_na), LOG2.names)
 #'
-
 #' print(imputed_matrix)
-#'}
+#' }
 
 impute_KNN_data <- function(df, LOG2.names, ...) {
     impute.names <- sub("LOG2", "impute", LOG2.names)
@@ -1660,10 +1664,12 @@ corrplot_function <- function(df, metadata, display = "circle", tl.col = "black"
 #'
 #' print(results)
 #'
-statistical_analysis <- function(df, test, paired = FALSE, metadata, logfc, sig,
+statistical_analysis <- function(
+    df, test, paired = FALSE, metadata, logfc, sig,
     adjval, statval, unique_proteins, way, psms,
     platform, selected_conditions,
-    diann_dir = NULL) {
+    diann_dir = NULL
+) {
     first_group <- unique(metadata$group)[unique(metadata$group) == selected_conditions[2]]
 
     condition1_names <- metadata %>%
@@ -2725,7 +2731,11 @@ my_heatmap_differential <- function(limma, data, cond.names, title) {
 #'     Diferential_boxplot(df_box, metadata_box, "Prot1", log_names, selected_cond)
 #' }
 #'
-Diferential_boxplot <- function(df, metadata, protein, LOG2.names, selected_conditions) {
+Diferential_boxplot <- function(df, metadata, protein = NULL, LOG2.names, selected_conditions) {
+    if (is.null(protein) || protein == "") {
+        protein <- sample(df$Protein, 1)
+    }
+
     row.names(df) <- df$Protein
 
     subset_data <- df[df$Protein == protein, c(LOG2.names)]
@@ -2774,6 +2784,8 @@ Diferential_boxplot <- function(df, metadata, protein, LOG2.names, selected_cond
             protein
         }) +
         ggplot2::theme(axis.title.x = ggplot2::element_blank())
+
+    return(p)
 }
 
 
@@ -2844,11 +2856,11 @@ Diferential_boxplot <- function(df, metadata, protein, LOG2.names, selected_cond
 #'             # 3. Safe printing (checks if result exists before printing)
 #'             # We check if go_res exists, is a list, and has the expected slot
 #'             if (!is.null(go_res) &&
-#'                  is.list(go_res) &&
-#'                  length(go_res) >= 1 &&
-#'                  inherits(go_res[[1]], "compareClusterResult")) {
-#'                  print(head(as.data.frame(go_res[[1]])))
-#'              }
+#'                 is.list(go_res) &&
+#'                 length(go_res) >= 1 &&
+#'                 inherits(go_res[[1]], "compareClusterResult")) {
+#'                 print(head(as.data.frame(go_res[[1]])))
+#'             }
 #'         },
 #'         silent = TRUE
 #'     )
@@ -3017,6 +3029,34 @@ barplot_func <- function(terms, number, conditions, ...) {
         ggplot2::facet_grid(~Cluster) +
         ggplot2::ylab("Number of proteins") +
         ggplot2::ggtitle(conditions)
+}
+
+
+#' @title Manhattan Plot for Functional Enrichment
+#'
+#' @description This function is a helper wrapper that extracts the raw
+#' gprofiler2 results (the third element) from the output of
+#' the Goterms_finder function to generate a Manhattan plot of enriched terms.
+#'
+#' @param terms A list of length 3 generated by Goterms_finder function.
+#' @param ... Additional arguments passed to `gprofiler2::gostplot`
+#'
+#' @return A ggplot or plotly object representing the Manhattan
+#' plot of functional enrichment.
+#'
+#' @importFrom gprofiler2 gostplot
+#' @export
+#'
+#' @examples
+#' \donttest{
+#' gostplot_func(res)
+#' }
+gostplot_func <- function(terms, ...) {
+    if (!is.list(terms) || length(terms) < 3) {
+        stop("Input 'terms' must be a list of at least length 3 generated by Goterms_finder.")
+    }
+
+    gostplot(terms[[3]], ...)
 }
 
 

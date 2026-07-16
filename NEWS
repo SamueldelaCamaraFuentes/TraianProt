@@ -1,2 +1,5 @@
-Changes in version 0.99.5:
-- Package submission to Bioconductor.
+Changes in version 0.99.16:
+- The Shiny app has been integrated directly into the package.
+- The code for the Shiny app has been restructured into smaller modules to improve its readability, reusability, and maintainability.
+- To ensure interoperability with other Bioconductor packages, a function that exports TraianProt results to the Summarized Experiment format is now included.
+- The issue of only upregulated proteins being printed in both the up- and down-regulated networks has been resolved.

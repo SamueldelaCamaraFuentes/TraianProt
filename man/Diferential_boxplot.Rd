@@ -4,7 +4,13 @@
 \alias{Diferential_boxplot}
 \title{Differential Protein Boxplot}
 \usage{
-Diferential_boxplot(df, metadata, protein, LOG2.names, selected_conditions)
+Diferential_boxplot(
+  df,
+  metadata,
+  protein = NULL,
+  LOG2.names,
+  selected_conditions
+)
 }
 \arguments{
 \item{df}{A data frame with expression data. Must have a 'Protein' column

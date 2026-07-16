@@ -157,7 +157,7 @@ runTraianProt <- function() {
         conditionalPanel(
             condition = "input.main_tabs == 'diffplots'",
             sidebarMenu(
-                menuItem("Differential analysis plots", icon = icon("chart-area"), strong(h4("Volcano plot")), numericInput("labelprots", "Point size", value = 10), textInput("volcanotitle", "Insert a title", value = "Treatment vs Control"), strong(h4("Heatmap")), textInput("heatmaptitle", "Insert a title", value = "Treatment vs Control"), strong(h4("Protein Intensity")), textInput("proteinname", "Insert a title", value = "Treatment vs Control")),
+                menuItem("Differential analysis plots", icon = icon("chart-area"), strong(h4("Volcano plot")), numericInput("labelprots", "Point size", value = 10), textInput("volcanotitle", "Insert a title", value = "Treatment vs Control"), strong(h4("Heatmap")), textInput("heatmaptitle", "Insert a title", value = "Treatment vs Control"), strong(h4("Protein Intensity")), textInput("proteinname", "Enter Protein ID", value = "")),
                 menuItem("Download plot options", icon = icon("download"), selectInput("difextension", "File type:", choices = c("tiff", "pdf", "jpeg", "png"), selected = "pdf"), selectInput("difquality", "Quality:", choices = c("High" = "retina", "Medium" = "print", "low" = "screen"), selected = ""), textInput("name_download_volcano", "Filename Volcano", value = "Volcano"), textInput("name_download_heatmap", "Filename Heatmap", value = "Heatmap"), h5("Volcano download"), downloadButton("downloadvolcano", "Download volcano", icon = icon("download"), style = "display: block; margin: 0 auto; width: 200px; color:black;"), h5("Heatmap download"), downloadButton("downloadheatmap", "Download heatmap", icon = icon("download"), style = "display: block; margin: 0 auto; width: 200px; color:black;"), h5("Differential Heatmap download"), downloadButton("downloaddifheatmap", "Download heatmap", icon = icon("download"), style = "display: block; margin: 0 auto; width: 200px; color:black;"))
             )
         ),
@@ -230,7 +230,7 @@ runTraianProt <- function() {
 .tab_preprocessing <- function() {
     tabPanel(
         title = "Preprocessing", value = "data_handling", icon = icon("table"),
-        box(title = "Note", width = 12, status = "warning", solidHeader = TRUE, helpText("Tip: For FragPipe and Proteome Discoverer datasets...")),
+        box(title = "Note", width = 12, status = "warning", solidHeader = TRUE, helpText("Tip: For FragPipe and Proteome Discoverer datasets please use the Unique Peptide Extractor app whose button is on the left")),
         column(width = 12, DT::dataTableOutput("file")),
         fluidPage(
             fluidRow(
@@ -654,7 +654,6 @@ runTraianProt <- function() {
                 )
             }
             if (inherits(plot_obj, "ggplot")) {
-
                 ggplot2::ggsave(file,
                     plot = plot_obj, device = "tiff", width = w_px, height = h_px,
                     units = "px", dpi = r, limitsize = FALSE, compression = "lzw"
@@ -849,10 +848,10 @@ runTraianProt <- function() {
         igraph_analysis(interactions(), input$taxonid, input$scthreshold)
     })
     output$upgraph <- DT::renderDataTable({
-        datatable(graph()[[1]], options = list(pageLength = 1, scrollX = TRUE))
+        DT::datatable(graph()[[1]], options = list(pageLength = 1, scrollX = TRUE))
     })
     output$downgraph <- DT::renderDataTable({
-        datatable(graph()[[2]], options = list(pageLength = 1, scrollX = TRUE))
+        DT::datatable(graph()[[2]], options = list(pageLength = 1, scrollX = TRUE))
     })
 }
 

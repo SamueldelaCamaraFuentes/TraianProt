@@ -5,6 +5,9 @@
 #' @importFrom stringr str_replace
 #' @importFrom wrProteo readMaxQuantFile
 #' @importFrom clusterProfiler enrichGO
+#' @importFrom graphics barplot plot.new
+#' @importFrom stats complete.cases
+#' @importFrom utils write.csv write.table
 NULL
 
 utils::globalVariables(c(

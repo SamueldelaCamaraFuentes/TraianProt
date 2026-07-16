@@ -87,11 +87,11 @@ if (requireNamespace("gprofiler2", quietly = TRUE)) {
             # 3. Safe printing (checks if result exists before printing)
             # We check if go_res exists, is a list, and has the expected slot
             if (!is.null(go_res) &&
-                 is.list(go_res) &&
-                 length(go_res) >= 1 &&
-                 inherits(go_res[[1]], "compareClusterResult")) {
-                 print(head(as.data.frame(go_res[[1]])))
-             }
+                is.list(go_res) &&
+                length(go_res) >= 1 &&
+                inherits(go_res[[1]], "compareClusterResult")) {
+                print(head(as.data.frame(go_res[[1]])))
+            }
         },
         silent = TRUE
     )
