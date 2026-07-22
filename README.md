@@ -1,8 +1,14 @@
-# <img src="inst/extdata/traianprot.png" align="centered" height="139" alt="TraianProt logo" />
+<div align="center">
+
+<img src="inst/extdata/traianprot.png" height="139" alt="TraianProt logo" />
+
+# TraianProt
 
 [![Bioconductor Build Status](https://bioconductor.org/shields/build/devel/bioc/TraianProt.svg)](http://bioconductor.org/checkResults/devel/bioc-LATEST/TraianProt/)
 [![Iniciativa Shiny App](https://img.shields.io/badge/Launch-Shiny%20App-blue?style=flat-square&logo=shiny&logoColor=white)](https://samueldelacamara.shinyapps.io/TraianProt/)
 [![Licencia GPL](https://img.shields.io/badge/License-GPL--3-green.svg)](https://opensource.org/licenses/GPL-3.0)
+
+</div>
 
 <br>
 <br>
