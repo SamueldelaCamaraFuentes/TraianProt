@@ -2596,7 +2596,7 @@ my_heatmap <- function(data, cond.names, title) {
 #'
 #' @return A ggplot object.
 #' @export
-#' @importFrom dplyr %>% bind_rows filter all_of group_by mutate ungroup
+#' @importFrom dplyr %>% bind_rows filter all_of group_by mutate ungroup desc
 #' @importFrom tidyr pivot_longer
 #' @importFrom ggplot2 ggplot aes geom_tile scale_fill_gradient2 labs theme_minimal
 #' @importFrom ggplot2 theme element_text annotate theme_void

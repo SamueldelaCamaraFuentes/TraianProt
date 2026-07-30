@@ -19,6 +19,6 @@ utils::globalVariables(c(
     "adj.P.Val", "sca.P.Value", "sca.adj.pval", "x", "y",
     "Var1", "Var2", "value", "KEEP", "Type",
     "counts_condition1", "counts_condition2",
-    "intensity_sample_name", "raw_name", "sample_name",
+    "intensity_sample_name", "raw_name", "sample_name", "desc", "logFC",
     "unique_peptides_col", "Count", "Group", "Intensity_scaled"
 ))

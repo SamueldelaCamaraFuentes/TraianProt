@@ -21,6 +21,7 @@ vignette: >
 knitr::opts_chunk$set(
     collapse = TRUE,
     comment = "#>",
+    crop = NULL,
     warning = FALSE,
     message = FALSE,
     fig.width = 10,
@@ -418,7 +419,8 @@ barplot_func(Go_terms, 10, conditions = conditions, font.size = 10)
 In the interaction analysis module, the user is allowed to perform a protein interaction analysis with the proteins that exhibited significant changes in their relative abundance using the STRINGdb (v2.20) R package. For that purpose, the user is required to introduce the STRING ID for the species along with a score threshold.
 
 
-```{r interaction-analysis, echo=FALSE, out.width="100%"}
+```{r interaction-analysis, eval= FALSE, echo=FALSE, out.width="100%"}
+# This code requires internet conection and sometimes the STRINGdb server is down. We set this chunk not to be executed.
 interactions <- interactions_up(limma, taxonid = 237561, score = 400)
 
 interactions_down <- interactions_down(limma, taxonid = 237561, score = 400)
